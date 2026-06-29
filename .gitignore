@@ -1,0 +1,33 @@
+# Dependency Directories
+**/node_modules/
+jspm_packages/
+web_modules/
+
+# Next.js Build Outputs
+frontend/.next/
+frontend/out/
+
+# Electron Build Outputs
+desktop/dist/
+desktop/out/
+
+# Android Build Outputs & JDK
+mobile/.gradle/
+mobile/build/
+mobile/app/build/
+mobile/local.properties
+mobile/jdk/
+
+# Environment Variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+backend/.env
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
