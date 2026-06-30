@@ -110,7 +110,7 @@ class MainActivity : ComponentActivity() {
                                     mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
                                 }
                                 
-                                loadUrl("http://10.0.2.2:3000")
+                                loadUrl("https://pdfmaster-pro.vercel.app")
                             }
                         },
                         modifier = Modifier.fillMaxSize()

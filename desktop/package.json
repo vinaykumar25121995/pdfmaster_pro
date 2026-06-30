@@ -14,7 +14,8 @@
   },
   "devDependencies": {
     "electron": "^29.3.0",
-    "electron-builder": "^24.13.3"
+    "electron-builder": "^24.13.3",
+    "electron-packager": "^17.1.2"
   },
   "build": {
     "appId": "com.pdfmaster.pro",
@@ -36,8 +37,6 @@
       ],
       "icon": "icon.icns"
     },
-    "dmg": {
-      "oneClick": true
-    }
+    "dmg": {}
   }
 }
