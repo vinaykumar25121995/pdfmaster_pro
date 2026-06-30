@@ -11,6 +11,7 @@ import {
   RotateCw, Hash, Type, Crop, Edit3, Layout, Unlock, Lock,
   Eraser, Languages, Minimize2
 } from 'lucide-react';
+import { ILovePdfLogo } from '@/components/ILovePdfLogo';
 import { useTheme } from '@/components/ThemeProvider';
 
 export default function LandingPage() {
@@ -212,13 +213,17 @@ export default function LandingPage() {
       
       {/* Navigation Bar */}
       <nav className="sticky top-0 z-50 glass-panel backdrop-blur-md px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <div className="bg-primary p-2 rounded-xl text-white">
-            <FileText className="h-6 w-6" />
+        <div className="flex items-center space-x-4">
+          <ILovePdfLogo className="h-8" />
+          <div className="w-px h-6 bg-slate-300 dark:bg-slate-700"></div>
+          <div className="flex items-center space-x-2">
+            <div className="bg-primary p-2 rounded-xl text-white">
+              <FileText className="h-6 w-6" />
+            </div>
+            <span className="font-display font-bold text-xl tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              PDFMaster Pro
+            </span>
           </div>
-          <span className="font-display font-bold text-xl tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            PDFMaster Pro
-          </span>
         </div>
 
         <div className="hidden md:flex items-center space-x-8 text-sm font-medium">
