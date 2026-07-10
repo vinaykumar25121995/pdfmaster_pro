@@ -35,8 +35,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   useEffect(() => {
     const hasToken = localStorage.getItem('token');
+    // PDF Reading is always 100% free and unlimited
+    if (pathname && pathname.startsWith('/dashboard/reader')) {
+      setShowLoginModal(false);
+      return;
+    }
     if (!hasToken) {
-      const currentCount = parseInt(localStorage.getItem('pdfmaster_usage_count') || '0', 10) + 1;
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const storedDate = localStorage.getItem('pdfmaster_usage_date');
+      let currentCount = 0;
+      if (storedDate === todayStr) {
+        currentCount = parseInt(localStorage.getItem('pdfmaster_usage_count') || '0', 10) + 1;
+      } else {
+        // New day! Reset counter daily
+        currentCount = 1;
+        localStorage.setItem('pdfmaster_usage_date', todayStr);
+      }
       localStorage.setItem('pdfmaster_usage_count', currentCount.toString());
       setUsageCount(currentCount);
       if (currentCount > 20) {
@@ -86,20 +100,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div>
           {/* Logo Brand */}
           <div className="p-5 flex items-center justify-between border-b border-slate-200/50 dark:border-slate-800/50">
-            <div className="flex items-center space-x-2.5">
-              <Link href="/" title="Home Page" className="hover:opacity-85 transition-opacity">
-                <ILovePdfLogo className="h-6" />
-              </Link>
-              <div className="w-px h-5 bg-slate-300 dark:bg-slate-700"></div>
-              <Link href="/" className="flex items-center space-x-1.5 hover:opacity-85 transition-opacity" title="Home Page">
-                <div className="bg-primary p-1.5 rounded-lg text-white">
-                  <FileText className="h-4 w-4" />
-                </div>
-                <span className="font-display font-bold text-sm tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                  PDFMaster Pro
-                </span>
-              </Link>
-            </div>
+            <Link href="/" title="Home Page" className="hover:opacity-90 transition-opacity">
+              <ILovePdfLogo className="h-8 w-8" />
+            </Link>
             <button 
               onClick={() => setSidebarOpen(false)}
               className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 lg:hidden"
@@ -284,10 +287,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <User className="h-8 w-8" />
             </div>
             <h3 className="text-xl font-display font-bold text-slate-900 dark:text-white">
-              Free Guest Access Limit Reached
+              Daily Guest Limit Reached
             </h3>
             <p className="text-sm text-slate-600 dark:text-slate-400">
-              You have used PDFMaster Pro <span className="font-bold text-primary">20 times</span> for free on this device! To continue enjoying unlimited access to all professional tools, please log in or create a free account.
+              You have used your <span className="font-bold text-primary">20 free daily tool actions</span> for today on this device! Resets daily at midnight.
+              <br /><br />
+              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                ✨ Note: PDF Reading is always 100% FREE and unlimited every day!
+              </span>
             </p>
             <div className="pt-2 flex flex-col gap-2">
               <Link
