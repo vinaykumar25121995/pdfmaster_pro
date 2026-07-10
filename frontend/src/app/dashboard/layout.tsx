@@ -9,6 +9,7 @@ import {
   Search, Bell, Sun, Moon, LogOut, Menu, X, User
 } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
+import { ILovePdfLogo } from '@/components/ILovePdfLogo';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -84,15 +85,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       >
         <div>
           {/* Logo Brand */}
-          <div className="p-6 flex items-center justify-between border-b border-slate-200/50 dark:border-slate-800/50">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="bg-primary p-1.5 rounded-lg text-white">
-                <FileText className="h-5 w-5" />
-              </div>
-              <span className="font-display font-bold text-base tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                PDFMaster Pro
-              </span>
-            </Link>
+          <div className="p-5 flex items-center justify-between border-b border-slate-200/50 dark:border-slate-800/50">
+            <div className="flex items-center space-x-2.5">
+              <Link href="/" title="Home Page" className="hover:opacity-85 transition-opacity">
+                <ILovePdfLogo className="h-6" />
+              </Link>
+              <div className="w-px h-5 bg-slate-300 dark:bg-slate-700"></div>
+              <Link href="/" className="flex items-center space-x-1.5 hover:opacity-85 transition-opacity" title="Home Page">
+                <div className="bg-primary p-1.5 rounded-lg text-white">
+                  <FileText className="h-4 w-4" />
+                </div>
+                <span className="font-display font-bold text-sm tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                  PDFMaster Pro
+                </span>
+              </Link>
+            </div>
             <button 
               onClick={() => setSidebarOpen(false)}
               className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 lg:hidden"
