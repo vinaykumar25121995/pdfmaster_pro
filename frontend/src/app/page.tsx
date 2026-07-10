@@ -9,7 +9,7 @@ import {
   ChevronDown, ChevronUp, Scissors, Trash2, Files, LayoutGrid, Scan,
   ShieldAlert, Image, FileCode, Presentation, FileSpreadsheet,
   RotateCw, Hash, Type, Crop, Edit3, Layout, Unlock, Lock,
-  Eraser, Languages, Minimize2
+  Eraser, Languages, Minimize2, Search
 } from 'lucide-react';
 import { ILovePdfLogo } from '@/components/ILovePdfLogo';
 import { useTheme } from '@/components/ThemeProvider';
@@ -402,7 +402,7 @@ export default function LandingPage() {
 
           {/* Cards Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {allTools
+            {megamenuCategories
               .filter((section) => activeCategory === "ALL" || section.title === activeCategory)
               .flatMap((section) =>
                 section.items.map((item) => ({ ...item, category: section.title, color: section.color }))
