@@ -251,8 +251,8 @@ export default function LandingPage() {
             Login
           </Link>
           
-          <Link href="/auth/login?signup=true" className="px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-xl text-sm font-semibold shadow-lg shadow-primary/25 transition-all">
-            Get Started
+          <Link href="/auth/login?mode=signup" className="px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-xl text-sm font-bold tracking-wide shadow-lg shadow-primary/25 transition-all">
+            SIGN UP
           </Link>
         </div>
       </nav>
@@ -323,10 +323,10 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/auth/login?signup=true" className="w-full sm:w-auto px-8 py-4 bg-primary hover:bg-primary-dark text-white font-semibold rounded-2xl shadow-xl shadow-primary/30 transition-all flex items-center justify-center gap-2 group">
+            <a href="#all-tools" className="w-full sm:w-auto px-8 py-4 bg-primary hover:bg-primary-dark text-white font-semibold rounded-2xl shadow-xl shadow-primary/30 transition-all flex items-center justify-center gap-2 group">
               Start Free
               <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
+            </a>
 
             <a href="#desktop-download" className="w-full sm:w-auto px-8 py-4 bg-slate-900 hover:bg-black text-white dark:bg-secondary-light dark:hover:bg-slate-800 font-semibold rounded-2xl border border-slate-800 transition-all flex items-center justify-center gap-2">
               <Download className="h-4 w-4 text-accent" />
