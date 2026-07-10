@@ -23,7 +23,7 @@ function createWindow() {
   // In development, we load the local live server
   const startUrl = process.env.NODE_ENV === 'development' 
     ? 'http://localhost:3000' 
-    : 'https://pdfmaster-pro.vercel.app';
+    : 'https://ilovepdfmaster.vercel.app';
 
   mainWindow.loadURL(startUrl);
 
