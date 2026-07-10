@@ -25,7 +25,16 @@ function createWindow() {
     ? 'http://localhost:3000' 
     : 'https://ilovepdfmaster.vercel.app';
 
-  mainWindow.loadURL(startUrl);
+  mainWindow.loadURL(startUrl).catch(() => {
+    // If offline or network error, load local offline core
+    mainWindow.loadFile(path.join(__dirname, 'offline.html'));
+  });
+
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+    if (errorCode !== -3) { // ignore aborted loads
+      mainWindow.loadFile(path.join(__dirname, 'offline.html'));
+    }
+  });
 
   // Open DevTools in development mode
   if (process.env.NODE_ENV === 'development') {

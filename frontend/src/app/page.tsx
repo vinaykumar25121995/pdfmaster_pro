@@ -208,6 +208,11 @@ export default function LandingPage() {
     }
   ];
 
+  const [activeCategory, setActiveCategory] = useState("ALL");
+  const [toolSearchQuery, setToolSearchQuery] = useState("");
+
+  const categories = ["ALL", "ORGANIZE PDF", "OPTIMIZE PDF", "CONVERT TO PDF", "CONVERT FROM PDF", "EDIT PDF", "PDF SECURITY", "PDF INTELLIGENCE"];
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-secondary-dark text-slate-900 dark:text-slate-100 transition-colors duration-300">
       
@@ -350,6 +355,118 @@ export default function LandingPage() {
               <Globe className="h-5 w-5 text-accent" />
               <span>100% Client-Side Processing Support</span>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Complete All PDF Tools Interactive Grid (Hero & Second Page Display) */}
+      <section id="all-tools" className="py-20 bg-slate-100/60 dark:bg-secondary-dark/80 border-t border-slate-200/60 dark:border-slate-800/60 relative">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center space-y-4 mb-10">
+            <h2 className="text-3xl md:text-5xl font-black font-display tracking-tight text-slate-900 dark:text-white">
+              Every tool you need to work with PDFs in one place
+            </h2>
+            <p className="text-base md:text-lg text-slate-600 dark:text-slate-400 max-w-3xl mx-auto font-medium">
+              Every tool you need to use PDFs, at your fingertips. All are 100% FREE and easy to use! Merge, split, compress, convert, rotate, unlock and watermark PDFs with just a few clicks.
+            </p>
+
+            {/* Category Pills Header */}
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-4">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
+                    activeCategory === cat
+                      ? "bg-slate-900 text-white dark:bg-primary dark:text-white shadow-lg shadow-primary/20 scale-105"
+                      : "bg-white dark:bg-secondary text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:border-primary"
+                  }`}
+                >
+                  {cat === "ALL" ? "All" : cat.charAt(0) + cat.slice(1).toLowerCase()}
+                </button>
+              ))}
+            </div>
+
+            {/* Quick Search bar */}
+            <div className="max-w-md mx-auto relative pt-2">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search any tool (e.g. Merge, Word, Sign)..."
+                value={toolSearchQuery}
+                onChange={(e) => setToolSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-secondary border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 shadow-sm"
+              />
+            </div>
+          </div>
+
+          {/* Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {allTools
+              .filter((section) => activeCategory === "ALL" || section.title === activeCategory)
+              .flatMap((section) =>
+                section.items.map((item) => ({ ...item, category: section.title, color: section.color }))
+              )
+              .filter((item) =>
+                toolSearchQuery.trim() === "" ||
+                item.name.toLowerCase().includes(toolSearchQuery.toLowerCase())
+              )
+              .map((tool, idx) => (
+                <Link
+                  key={idx}
+                  href={tool.path}
+                  className="bg-white dark:bg-secondary/90 border border-slate-200/80 dark:border-slate-800/80 hover:border-primary/50 dark:hover:border-primary/50 rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group hover:-translate-y-1"
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className={`p-3 rounded-xl bg-slate-100 dark:bg-slate-800/80 ${tool.color} group-hover:scale-110 transition-transform`}>
+                        {tool.icon}
+                      </div>
+                      <ArrowRight className="h-4 w-4 text-slate-300 dark:text-slate-600 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                    </div>
+                    <h3 className="font-bold text-lg text-slate-900 dark:text-white font-display mb-2 group-hover:text-primary transition-colors">
+                      {tool.name}
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-normal">
+                      {tool.name === "Merge PDF" && "Combine PDFs in the order you want with the easiest PDF merger available."}
+                      {tool.name === "Split PDF" && "Separate one page or a whole set for easy conversion into independent PDF files."}
+                      {tool.name === "Compress PDF" && "Reduce file size while optimizing for maximal PDF quality."}
+                      {tool.name === "PDF to WORD" && "Easily convert your PDF files into easy to edit DOC and DOCX documents."}
+                      {tool.name === "PDF to POWERPOINT" && "Turn your PDF files into easy to edit PPT and PPTX slideshows."}
+                      {tool.name === "PDF to EXCEL" && "Pull data straight from PDFs into Excel spreadsheets in a few short seconds."}
+                      {tool.name === "WORD to PDF" && "Make DOC and DOCX files easy to read by converting them to PDF."}
+                      {tool.name === "POWERPOINT to PDF" && "Make PPT and PPTX slideshows easy to view by converting them to PDF."}
+                      {tool.name === "EXCEL to PDF" && "Make EXCEL spreadsheets easy to read by converting them to PDF."}
+                      {tool.name === "Edit PDF" && "Add text, images, shapes or freehand annotations to a PDF document."}
+                      {tool.name === "PDF to JPG" && "Convert each PDF page into a JPG or extract all images contained in a PDF."}
+                      {tool.name === "JPG to PDF" && "Convert JPG images to PDF in seconds. Easily adjust orientation and margins."}
+                      {tool.name === "Sign PDF" && "Sign yourself or request electronic signatures from others."}
+                      {tool.name === "Add watermark" && "Stamp an image or text over your PDF in seconds."}
+                      {tool.name === "Rotate PDF" && "Rotate your PDFs the way you need them."}
+                      {tool.name === "HTML to PDF" && "Convert webpages in HTML to PDF."}
+                      {tool.name === "Unlock PDF" && "Remove PDF password security."}
+                      {tool.name === "Protect PDF" && "Protect PDF files with a password."}
+                      {tool.name === "Organize PDF" && "Sort pages of your PDF file however you like."}
+                      {tool.name === "PDF to PDF/A" && "Transform your PDF to PDF/A for long-term archiving."}
+                      {tool.name === "Repair PDF" && "Recover data from a damaged or corrupt PDF document."}
+                      {tool.name === "Add page numbers" && "Add page numbers into PDFs with custom position & font."}
+                      {tool.name === "Scan to PDF" && "Capture scans from mobile or scanner directly to PDF."}
+                      {tool.name === "OCR PDF" && "Convert non-selectable scanned PDF text into searchable text."}
+                      {tool.name === "Compare PDF" && "Compare side-by-side differences between two PDF documents."}
+                      {tool.name === "AI Summarizer" && "Extract key insights and summaries from any PDF instantly using AI."}
+                      {tool.name === "Extract pages" && "Extract pages from your PDF document instantly."}
+                      {tool.name === "Crop PDF" && "Crop margins and adjust page boundaries."}
+                      {tool.name === "PDF Forms" && "Fill out and create PDF forms directly."}
+                      {tool.name === "Redact PDF" && "Permanently remove confidential information from PDF."}
+                      {tool.name === "Translate PDF" && "Translate PDF text into 100+ languages instantly."}
+                    </p>
+                  </div>
+                  <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between text-[11px] font-bold text-primary">
+                    <span>Free & Offline Ready</span>
+                    <span>Launch →</span>
+                  </div>
+                </Link>
+              ))}
           </div>
         </div>
       </section>
