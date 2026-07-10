@@ -18,18 +18,31 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [user, setUser] = useState<{ email: string; firstName: string; lastName: string; role: string; plan: string } | null>(null);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [usageCount, setUsageCount] = useState(0);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     } else {
-      // Fallback local mock user details if session is empty
-      const defaultUser = { email: 'user@pdfmaster.com', firstName: 'John', lastName: 'Doe', role: 'user', plan: 'free' };
+      const defaultUser = { email: 'guest@pdfmaster.com', firstName: 'Guest', lastName: 'User', role: 'user', plan: 'free' };
       localStorage.setItem('user', JSON.stringify(defaultUser));
       setUser(defaultUser);
     }
   }, []);
+
+  useEffect(() => {
+    const hasToken = localStorage.getItem('token');
+    if (!hasToken) {
+      const currentCount = parseInt(localStorage.getItem('pdfmaster_usage_count') || '0', 10) + 1;
+      localStorage.setItem('pdfmaster_usage_count', currentCount.toString());
+      setUsageCount(currentCount);
+      if (currentCount > 20) {
+        setShowLoginModal(true);
+      }
+    }
+  }, [pathname]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -256,6 +269,36 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </main>
       </div>
 
+      {/* 20 Free Uses Limit Modal */}
+      {showLoginModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
+          <div className="bg-white dark:bg-secondary-dark border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl text-center space-y-4">
+            <div className="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto">
+              <User className="h-8 w-8" />
+            </div>
+            <h3 className="text-xl font-display font-bold text-slate-900 dark:text-white">
+              Free Guest Access Limit Reached
+            </h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              You have used PDFMaster Pro <span className="font-bold text-primary">20 times</span> for free on this device! To continue enjoying unlimited access to all professional tools, please log in or create a free account.
+            </p>
+            <div className="pt-2 flex flex-col gap-2">
+              <Link
+                href="/auth/login"
+                className="w-full py-3 px-4 bg-gradient-to-r from-primary to-accent text-white font-semibold rounded-xl shadow-lg shadow-primary/25 hover:opacity-95 transition-all block text-center"
+              >
+                Log In / Create Free Account
+              </Link>
+              <button
+                onClick={() => setShowLoginModal(false)}
+                className="w-full py-2.5 px-4 text-xs font-semibold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-all"
+              >
+                Continue as Guest (1 final preview)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
