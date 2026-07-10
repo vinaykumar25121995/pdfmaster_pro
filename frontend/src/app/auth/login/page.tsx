@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { FileText, ShieldCheck, Mail, Lock, User, ArrowRight, Sparkles } from 'lucide-react';
+import { ILovePdfLogo } from '@/components/ILovePdfLogo';
 
 function LoginPageContent() {
   const router = useRouter();
@@ -81,13 +82,8 @@ function LoginPageContent() {
         
         {/* Brand Header */}
         <div className="text-center mb-10">
-          <Link href="/" className="inline-flex items-center space-x-2 mb-4">
-            <div className="bg-primary p-2 rounded-xl text-white">
-              <FileText className="h-6 w-6" />
-            </div>
-            <span className="font-display font-bold text-xl tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              PDFMaster Pro
-            </span>
+          <Link href="/" className="inline-flex justify-center mb-4">
+            <ILovePdfLogo className="h-12 w-12" />
           </Link>
           <h2 className="text-2xl font-bold font-display">
             {showOtpInput ? 'Verify Your Account' : isSignUp ? 'Create your account' : 'Welcome back'}
