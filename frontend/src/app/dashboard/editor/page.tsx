@@ -807,7 +807,7 @@ export default function PDFEditor() {
       if (!context) return;
 
       const viewport = page.getViewport({ scale: 1.2 });
-      const outputScale = (window.devicePixelRatio || 1) * 2; // Super-Sampling 2x
+      const outputScale = Math.max((window.devicePixelRatio || 1) * 2.5, 3.0); // Ultra-HD Lossless Retina quality
       
       canvas.width = Math.floor(viewport.width * outputScale);
       canvas.height = Math.floor(viewport.height * outputScale);
