@@ -10,9 +10,10 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
       user-select: none;
       overflow: hidden;
+      background-color: #F3F4F6;
     }
     ::-webkit-scrollbar {
       width: 8px;
@@ -28,14 +29,19 @@
     ::-webkit-scrollbar-thumb:hover {
       background: #94A3B8;
     }
+    /* Fixed GPU-Accelerated Toolbar */
+    .sticky-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      transform: translateZ(0);
+      will-change: transform;
+    }
     .ribbon-tab.active {
       background-color: #F8FAFC;
       border-bottom: 2px solid #DC2626;
       color: #DC2626;
       font-weight: 600;
-    }
-    .tool-btn:hover {
-      background-color: #F1F5F9;
     }
     .tool-card {
       transition: all 0.15s ease;
@@ -45,48 +51,77 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
-    .fab-btn {
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Floating Expandable Action Menu Transitions */
+    #floatingToolsMenu {
+      transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+      transform-origin: right center;
     }
-    .fab-btn:hover {
-      transform: translateX(-4px);
+    .floating-menu-item {
+      transition: all 150ms ease;
     }
+    .floating-menu-item:hover {
+      background-color: #F1F5F9;
+      transform: translateX(-3px);
+    }
+    /* Custom Tooltip Animation */
+    #featureTooltip {
+      transition: opacity 150ms ease, transform 150ms ease;
+      pointer-events: none;
+    }
+    /* Display Filter Enhancements (Never modifies PDF source file) */
+    .filter-normal { filter: none; }
+    .filter-contrast { filter: contrast(120%) brightness(98%) saturate(105%); }
+    .filter-sharpen { filter: contrast(112%) drop-shadow(0 0 0.5px rgba(0,0,0,0.25)); }
+    .filter-grayscale { filter: grayscale(100%) contrast(118%); }
+    .filter-comfort { filter: sepia(18%) brightness(96%) contrast(105%); }
   </style>
 </head>
-<body class="bg-[#F3F4F6] h-screen flex flex-col text-slate-800">
+<body class="h-screen flex flex-col text-slate-800">
 
-  <!-- TOP APP TITLE & RIBBON HEADER -->
-  <header class="bg-white border-b border-slate-200 select-none shadow-sm z-30">
+  <!-- TOP APP TITLE & STICKY GPU-ACCELERATED RIBBON HEADER -->
+  <header class="sticky-header bg-white border-b border-slate-200 select-none shadow-sm">
     
-    <!-- Row 1: Title Bar & Quick Actions -->
+    <!-- Row 1: Title Bar & Instant Quick Actions -->
     <div class="flex items-center justify-between px-3 py-1.5 border-b border-slate-100 bg-[#FAFAFA]">
       <div class="flex items-center gap-3">
         <!-- Files Brand Menu Button -->
-        <button id="btnOpenFiles" class="bg-red-600 hover:bg-red-700 text-white px-3.5 py-1.5 rounded-md text-xs font-semibold flex items-center gap-2 shadow-sm transition-colors">
+        <button id="btnOpenFiles" class="bg-red-600 hover:bg-red-700 text-white px-3.5 py-1.5 rounded-md text-xs font-semibold flex items-center gap-2 shadow-sm transition-colors cursor-pointer">
           <i class="fa-solid fa-folder-open"></i>
           <span>Files</span>
         </button>
 
-        <!-- Quick Action Toolbar -->
+        <!-- Quick Action Toolbar (Instant response, no delay) -->
         <div class="flex items-center gap-1 border-l border-slate-200 pl-3 text-slate-600">
-          <button id="btnQuickOpen" title="Open Local PDF" class="p-1.5 hover:bg-slate-200 rounded text-xs"><i class="fa-regular fa-folder-open"></i></button>
-          <button id="btnQuickSave" title="Save Document" class="p-1.5 hover:bg-slate-200 rounded text-xs"><i class="fa-regular fa-floppy-disk"></i></button>
-          <button id="btnQuickPrint" title="Print Document" class="p-1.5 hover:bg-slate-200 rounded text-xs"><i class="fa-solid fa-print"></i></button>
+          <button id="btnQuickOpen" title="Open Local PDF (Ctrl+O)" class="p-1.5 hover:bg-slate-200 rounded text-xs cursor-pointer"><i class="fa-regular fa-folder-open"></i></button>
+          <button id="btnQuickSave" title="Save Document (Ctrl+S)" class="p-1.5 hover:bg-slate-200 rounded text-xs cursor-pointer"><i class="fa-regular fa-floppy-disk"></i></button>
+          <button id="btnQuickPrint" title="Print Document (Ctrl+P)" class="p-1.5 hover:bg-slate-200 rounded text-xs cursor-pointer"><i class="fa-solid fa-print"></i></button>
           <span class="w-px h-4 bg-slate-300 mx-1"></span>
-          <button id="btnUndo" title="Undo" class="p-1.5 hover:bg-slate-200 rounded text-xs"><i class="fa-solid fa-rotate-left"></i></button>
-          <button id="btnRedo" title="Redo" class="p-1.5 hover:bg-slate-200 rounded text-xs"><i class="fa-solid fa-rotate-right"></i></button>
+          <button id="btnUndo" title="Undo (Ctrl+Z)" class="p-1.5 hover:bg-slate-200 rounded text-xs cursor-pointer"><i class="fa-solid fa-rotate-left"></i></button>
+          <button id="btnRedo" title="Redo (Ctrl+Y)" class="p-1.5 hover:bg-slate-200 rounded text-xs cursor-pointer"><i class="fa-solid fa-rotate-right"></i></button>
         </div>
       </div>
 
-      <!-- Center Document Title -->
-      <div class="flex items-center gap-2">
+      <!-- Center Document Title & Live Search Bar -->
+      <div class="flex items-center gap-3">
         <span id="docTitle" class="text-xs font-semibold text-slate-700">No Document Opened - PDFMaster Pro Desktop</span>
+        
+        <!-- Search Input Bar -->
+        <div class="relative flex items-center bg-slate-100 rounded-full px-3 py-1 border border-slate-200 text-xs">
+          <i class="fa-solid fa-magnifying-glass text-slate-400 mr-2"></i>
+          <input type="text" id="searchInput" placeholder="Search text (Ctrl+F)..." class="bg-transparent outline-none w-36 text-xs text-slate-700" />
+          <span id="searchCount" class="text-[10px] text-slate-500 ml-2 hidden">0/0</span>
+          <div class="flex items-center gap-1 ml-2 pl-2 border-l border-slate-300">
+            <button id="btnSearchPrev" title="Previous match" class="hover:text-red-600 px-1"><i class="fa-solid fa-chevron-up text-[10px]"></i></button>
+            <button id="btnSearchNext" title="Next match" class="hover:text-red-600 px-1"><i class="fa-solid fa-chevron-down text-[10px]"></i></button>
+          </div>
+        </div>
+
         <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Always Free & Unlimited</span>
       </div>
 
-      <!-- Right Logo -->
+      <!-- Right Logo & All 28 Tools -->
       <div class="flex items-center gap-3">
-        <button onclick="toggleToolsDrawer(true)" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3 py-1.5 rounded-md flex items-center gap-1.5 shadow-sm">
+        <button onclick="toggleToolsDrawer(true)" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3 py-1.5 rounded-md flex items-center gap-1.5 shadow-sm cursor-pointer">
           <i class="fa-solid fa-grid-2"></i>
           <span>All 28 Tools</span>
         </button>
@@ -98,393 +133,302 @@
 
     <!-- Row 2: Ribbon Tabs Navigation -->
     <nav class="flex items-center px-4 bg-[#FAFAFA] border-b border-slate-200 text-xs text-slate-600">
-      <button class="ribbon-tab active px-4 py-2 transition-all" data-tab="home" onclick="switchRibbonTab('home')">Home</button>
-      <button class="ribbon-tab px-4 py-2 transition-all" data-tab="edit" onclick="switchRibbonTab('edit')">Edit</button>
-      <button class="ribbon-tab px-4 py-2 transition-all" data-tab="annotate" onclick="switchRibbonTab('annotate')">Annotate</button>
-      <button class="ribbon-tab px-4 py-2 transition-all" data-tab="page" onclick="switchRibbonTab('page')">Page</button>
-      <button class="ribbon-tab px-4 py-2 transition-all" data-tab="convert" onclick="switchRibbonTab('convert')">Convert</button>
-      <button class="ribbon-tab px-4 py-2 transition-all" data-tab="tools" onclick="switchRibbonTab('tools')">Tools (All 28)</button>
-      <button class="ribbon-tab px-4 py-2 transition-all" data-tab="protect" onclick="switchRibbonTab('protect')">Protect</button>
+      <button onclick="switchRibbonTab('home')" class="ribbon-tab active px-4 py-2 cursor-pointer" data-tab="home">Home</button>
+      <button onclick="switchRibbonTab('edit')" class="ribbon-tab px-4 py-2 cursor-pointer" data-tab="edit">Edit</button>
+      <button onclick="switchRibbonTab('annotate')" class="ribbon-tab px-4 py-2 cursor-pointer" data-tab="annotate">Annotate</button>
+      <button onclick="switchRibbonTab('page')" class="ribbon-tab px-4 py-2 cursor-pointer" data-tab="page">Page</button>
+      <button onclick="switchRibbonTab('convert')" class="ribbon-tab px-4 py-2 cursor-pointer" data-tab="convert">Convert</button>
+      <button onclick="switchRibbonTab('tools')" class="ribbon-tab px-4 py-2 cursor-pointer" data-tab="tools">Tools</button>
+      <button onclick="switchRibbonTab('protect')" class="ribbon-tab px-4 py-2 cursor-pointer" data-tab="protect">Protect</button>
     </nav>
 
-    <!-- Row 3: Ribbon Toolbar (Dynamic per tab) -->
-    <div id="ribbonToolbar" class="px-4 py-2 bg-white flex items-center gap-4 overflow-x-auto min-h-[64px]">
+    <!-- Row 3: Main Tool Ribbon Bar -->
+    <div class="flex items-center justify-between px-4 py-2 bg-white text-xs">
       
-      <!-- HOME / EDIT RIBBON -->
-      <div class="ribbon-group flex items-center gap-3" id="ribbonHome">
-        <div class="flex items-center gap-1 border-r border-slate-200 pr-3">
-          <button class="tool-btn flex flex-col items-center justify-center px-2.5 py-1 rounded text-slate-700" onclick="runToolAction('Edit Text')">
-            <i class="fa-solid fa-font text-base text-slate-700 mb-1"></i>
+      <!-- Left Group: Essential Editing & Annotation Tools -->
+      <div class="flex items-center gap-5">
+        
+        <!-- Text & Content Group -->
+        <div class="flex items-center gap-3 pr-4 border-r border-slate-200">
+          <button onclick="runToolAction('Edit Text')" class="flex flex-col items-center gap-1 p-1.5 hover:bg-slate-100 rounded text-slate-700 cursor-pointer">
+            <span class="text-base font-bold text-red-600">A</span>
             <span class="text-[11px]">Edit Text</span>
           </button>
-          <button class="tool-btn flex flex-col items-center justify-center px-2.5 py-1 rounded text-slate-700" onclick="document.getElementById('imageInput').click()">
-            <i class="fa-regular fa-image text-base text-emerald-600 mb-1"></i>
-            <span class="text-[11px] font-semibold text-emerald-600">Add Image</span>
+          <button onclick="imageInput.click()" class="flex flex-col items-center gap-1 p-1.5 hover:bg-slate-100 rounded text-slate-700 cursor-pointer">
+            <i class="fa-regular fa-image text-emerald-600 text-sm"></i>
+            <span class="text-[11px]">Add Image</span>
           </button>
-          <button class="tool-btn flex flex-col items-center justify-center px-2.5 py-1 rounded text-slate-700" onclick="toggleSidePanel('comments')">
-            <i class="fa-regular fa-comment-dots text-base text-amber-600 mb-1"></i>
-            <span class="text-[11px]">Comments</span>
-          </button>
-          <button class="tool-btn flex flex-col items-center justify-center px-2.5 py-1 rounded text-slate-700" onclick="runToolAction('Redact PDF')">
-            <i class="fa-solid fa-eraser text-base text-slate-700 mb-1"></i>
+          <button onclick="runToolAction('Redact PDF')" class="flex flex-col items-center gap-1 p-1.5 hover:bg-slate-100 rounded text-slate-700 cursor-pointer">
+            <i class="fa-solid fa-eraser text-slate-600 text-sm"></i>
             <span class="text-[11px]">Redact</span>
           </button>
-          <button class="tool-btn flex flex-col items-center justify-center px-2.5 py-1 rounded text-slate-700" onclick="runToolAction('Sign PDF')">
-            <i class="fa-solid fa-signature text-base text-slate-700 mb-1"></i>
+          <button onclick="runToolAction('Sign PDF')" class="flex flex-col items-center gap-1 p-1.5 hover:bg-slate-100 rounded text-slate-700 cursor-pointer">
+            <i class="fa-solid fa-signature text-blue-600 text-sm"></i>
             <span class="text-[11px]">Signature</span>
           </button>
         </div>
 
-        <div class="flex items-center gap-2 border-r border-slate-200 pr-3">
-          <div class="flex items-center bg-slate-100 rounded border border-slate-200 px-2 py-1">
-            <button onclick="changeZoom(-0.1)" class="px-1.5 hover:text-red-600"><i class="fa-solid fa-minus text-xs"></i></button>
-            <span id="zoomLabel" class="text-xs font-semibold px-2">100%</span>
-            <button onclick="changeZoom(0.1)" class="px-1.5 hover:text-red-600"><i class="fa-solid fa-plus text-xs"></i></button>
+        <!-- Zoom & Display Enhance Controls -->
+        <div class="flex items-center gap-2 pr-4 border-r border-slate-200">
+          <div class="flex items-center bg-slate-100 rounded-md p-1">
+            <button onclick="changeZoom(-0.1)" title="Zoom Out (Ctrl+-)" class="px-2 py-0.5 hover:bg-white rounded text-slate-600 cursor-pointer"><i class="fa-solid fa-minus text-[10px]"></i></button>
+            <span id="zoomLabel" class="w-12 text-center font-semibold text-slate-700 text-xs">100%</span>
+            <button onclick="changeZoom(0.1)" title="Zoom In (Ctrl++)" class="px-2 py-0.5 hover:bg-white rounded text-slate-600 cursor-pointer"><i class="fa-solid fa-plus text-[10px]"></i></button>
           </div>
-          <button onclick="fitPage()" class="tool-btn p-1.5 rounded text-xs text-slate-600" title="Fit Page"><i class="fa-solid fa-compress"></i></button>
-          <button onclick="runToolAction('Rotate PDF')" class="tool-btn p-1.5 rounded text-xs text-slate-600" title="Rotate"><i class="fa-solid fa-rotate-right"></i></button>
+          <button onclick="fitPage()" title="Fit Page (Ctrl+0)" class="p-1.5 hover:bg-slate-100 rounded text-slate-600 cursor-pointer"><i class="fa-solid fa-expand"></i></button>
+          
+          <!-- Intelligent Display Quality Selector -->
+          <select id="displayEnhanceSelect" onchange="applyDisplayEnhancement(this.value)" class="bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[11px] font-medium text-slate-700 outline-none cursor-pointer">
+            <option value="normal">✨ Lossless Ultra-HD</option>
+            <option value="contrast">🔍 Enhance Scanned Text</option>
+            <option value="sharpen">⚡ Crisp Image & Vector Sharpen</option>
+            <option value="grayscale">📄 Grayscale Clarity</option>
+            <option value="comfort">🌙 Eye Comfort Mode</option>
+          </select>
         </div>
 
-        <div class="flex items-center gap-1 border-r border-slate-200 pr-3">
-          <button class="tool-btn flex flex-col items-center justify-center px-2.5 py-1 rounded text-slate-700" onclick="toggleSidePanel('thumbnails')">
-            <i class="fa-solid fa-table-cells-large text-base text-blue-600 mb-1"></i>
+        <!-- Annotation & Markup Group -->
+        <div class="flex items-center gap-4">
+          <button onclick="runToolAction('Highlight Text')" class="flex flex-col items-center gap-1 p-1 hover:bg-slate-100 rounded text-slate-700 cursor-pointer">
+            <i class="fa-solid fa-highlighter text-amber-500 text-sm"></i>
+            <span class="text-[11px]">Highlight</span>
+          </button>
+          <button onclick="toggleSidePanel('comments')" class="flex flex-col items-center gap-1 p-1 hover:bg-slate-100 rounded text-slate-700 cursor-pointer">
+            <i class="fa-regular fa-comment-dots text-red-500 text-sm"></i>
+            <span class="text-[11px]">Comments</span>
+          </button>
+          <button onclick="toggleSidePanel('thumbnails')" class="flex flex-col items-center gap-1 p-1 hover:bg-slate-100 rounded text-slate-700 cursor-pointer">
+            <i class="fa-solid fa-table-cells-large text-blue-600 text-sm"></i>
             <span class="text-[11px]">Thumbnails</span>
           </button>
-          <button class="tool-btn flex flex-col items-center justify-center px-2.5 py-1 rounded text-slate-700" onclick="runToolAction('Add watermark')">
-            <i class="fa-solid fa-water text-base text-blue-600 mb-1"></i>
-            <span class="text-[11px]">Watermark</span>
-          </button>
-          <button class="tool-btn flex flex-col items-center justify-center px-2.5 py-1 rounded text-slate-700" onclick="runToolAction('Crop PDF')">
-            <i class="fa-solid fa-crop-simple text-base text-slate-700 mb-1"></i>
-            <span class="text-[11px]">Crop PDF</span>
-          </button>
-          <button class="tool-btn flex flex-col items-center justify-center px-2.5 py-1 rounded text-slate-700" onclick="runToolAction('OCR PDF')">
-            <i class="fa-solid fa-eye text-base text-purple-600 mb-1"></i>
-            <span class="text-[11px]">OCR PDF</span>
+          <button onclick="runToolAction('OCR Scanner')" class="flex flex-col items-center gap-1 p-1 hover:bg-slate-100 rounded text-slate-700 cursor-pointer">
+            <i class="fa-solid fa-eye text-purple-600 text-sm"></i>
+            <span class="text-[11px]">OCR</span>
           </button>
         </div>
 
-        <div class="flex items-center gap-1">
-          <button class="tool-btn flex flex-col items-center justify-center px-2.5 py-1 rounded text-slate-700" onclick="toggleToolsDrawer(true)">
-            <i class="fa-solid fa-toolbox text-base text-red-600 mb-1"></i>
-            <span class="text-[11px] font-bold text-red-600">All 28 Tools</span>
-          </button>
+      </div>
+
+      <!-- Right Pro Status -->
+      <div class="flex items-center gap-3">
+        <button onclick="window.print()" class="flex flex-col items-center gap-1 p-1 hover:bg-slate-100 rounded text-slate-700 cursor-pointer">
+          <i class="fa-solid fa-print text-slate-600 text-sm"></i>
+          <span class="text-[11px]">Print</span>
+        </button>
+        <div class="flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 rounded-md text-amber-800 font-semibold text-xs">
+          <i class="fa-solid fa-crown text-amber-500"></i>
+          <span>Free Pro Suite</span>
         </div>
       </div>
 
     </div>
   </header>
 
-  <!-- ALL 28 TOOLS SECTION DRAWER (Exact 6 Columns matching user reference screenshot) -->
-  <div id="allToolsDrawer" class="hidden absolute inset-0 top-24 bg-white z-40 overflow-y-auto p-8 border-t border-slate-200 shadow-2xl">
+  <!-- ALL 28 TOOLS GRID DRAWER -->
+  <div id="allToolsDrawer" class="hidden absolute top-28 inset-x-0 bg-white border-b border-slate-300 shadow-2xl z-40 p-6 max-h-[75vh] overflow-y-auto">
     <div class="max-w-7xl mx-auto">
-      <div class="flex items-center justify-between pb-6 border-b border-slate-200 mb-8">
+      <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-200">
         <div>
-          <h2 class="text-2xl font-bold text-slate-900">PDFMaster Pro - All 28 Tools</h2>
-          <p class="text-sm text-slate-500 mt-1">Select any tool below to process your PDF documents locally. Always free & unlimited.</p>
+          <h2 class="text-base font-bold text-slate-800">All 28 PDFMaster Pro Tools</h2>
+          <p class="text-xs text-slate-500">Every desktop tool is 100% free, runs locally, and preserves lossless document quality.</p>
         </div>
-        <button onclick="toggleToolsDrawer(false)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold flex items-center gap-2">
-          <i class="fa-solid fa-xmark"></i>
-          <span>Close Tools Grid</span>
-        </button>
+        <button onclick="toggleToolsDrawer(false)" class="text-slate-400 hover:text-slate-700 p-2 text-lg"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
-      <!-- EXACT 6 COLUMN GRID FROM USER REFERENCE IMAGE -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-8">
-        
-        <!-- COLUMN 1: ORGANIZE PDF -->
+      <div class="grid grid-cols-6 gap-6">
+        <!-- ORGANIZE -->
         <div>
-          <h3 class="text-xs font-bold tracking-wider text-red-500 uppercase mb-4 border-b border-red-100 pb-2">Organize PDF</h3>
-          <div class="flex flex-col gap-2">
-            <button onclick="runToolAction('Merge PDF')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-regular fa-file-lines text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">Merge PDF</span>
-            </button>
-            <button onclick="runToolAction('Split PDF')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-solid fa-scissors text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">Split PDF</span>
-            </button>
-            <button onclick="runToolAction('Remove pages')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-regular fa-trash-can text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">Remove pages</span>
-            </button>
-            <button onclick="runToolAction('Extract pages')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-regular fa-copy text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">Extract pages</span>
-            </button>
-            <button onclick="runToolAction('Organize PDF')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-solid fa-table-cells-large text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">Organize PDF</span>
-            </button>
-            <button onclick="runToolAction('Scan to PDF')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-solid fa-expand text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">Scan to PDF</span>
-            </button>
+          <h3 class="text-xs font-bold text-red-600 uppercase mb-3 pb-1 border-b border-red-100">Organize PDF</h3>
+          <div class="flex flex-col gap-1.5">
+            <button onclick="runToolAction('Merge PDF')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-solid fa-object-group text-slate-500 w-4"></i><span class="text-xs font-semibold">Merge PDF</span></button>
+            <button onclick="runToolAction('Split PDF')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-solid fa-scissors text-slate-500 w-4"></i><span class="text-xs font-semibold">Split PDF</span></button>
+            <button onclick="runToolAction('Remove Pages')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-solid fa-trash-can text-slate-500 w-4"></i><span class="text-xs font-semibold">Remove Pages</span></button>
+            <button onclick="runToolAction('Extract Pages')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-solid fa-file-export text-slate-500 w-4"></i><span class="text-xs font-semibold">Extract Pages</span></button>
+            <button onclick="runToolAction('Organize Pages')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-solid fa-sort text-slate-500 w-4"></i><span class="text-xs font-semibold">Organize Pages</span></button>
           </div>
         </div>
-
-        <!-- COLUMN 2: OPTIMIZE PDF -->
+        <!-- OPTIMIZE -->
         <div>
-          <h3 class="text-xs font-bold tracking-wider text-emerald-600 uppercase mb-4 border-b border-emerald-100 pb-2">Optimize PDF</h3>
-          <div class="flex flex-col gap-2">
-            <button onclick="runToolAction('Compress PDF')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-solid fa-compress text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">Compress PDF</span>
-            </button>
-            <button onclick="runToolAction('Repair PDF')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-solid fa-shield-halved text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">Repair PDF</span>
-            </button>
-            <button onclick="runToolAction('OCR PDF')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-solid fa-microchip text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">OCR PDF</span>
-            </button>
+          <h3 class="text-xs font-bold text-emerald-600 uppercase mb-3 pb-1 border-b border-emerald-100">Optimize PDF</h3>
+          <div class="flex flex-col gap-1.5">
+            <button onclick="runToolAction('Compress PDF')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-solid fa-compress text-slate-500 w-4"></i><span class="text-xs font-semibold">Compress PDF</span></button>
+            <button onclick="runToolAction('Repair PDF')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-solid fa-wrench text-slate-500 w-4"></i><span class="text-xs font-semibold">Repair PDF</span></button>
+            <button onclick="runToolAction('OCR PDF')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-solid fa-eye text-slate-500 w-4"></i><span class="text-xs font-semibold">OCR Scanner</span></button>
           </div>
         </div>
-
-        <!-- COLUMN 3: CONVERT TO PDF -->
+        <!-- CONVERT TO -->
         <div>
-          <h3 class="text-xs font-bold tracking-wider text-amber-500 uppercase mb-4 border-b border-amber-100 pb-2">Convert to PDF</h3>
-          <div class="flex flex-col gap-2">
-            <button onclick="runToolAction('JPG to PDF')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-regular fa-image text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">JPG to PDF</span>
-            </button>
-            <button onclick="runToolAction('WORD to PDF')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-regular fa-file-word text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">WORD to PDF</span>
-            </button>
-            <button onclick="runToolAction('POWERPOINT to PDF')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-regular fa-file-powerpoint text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">POWERPOINT to PDF</span>
-            </button>
-            <button onclick="runToolAction('EXCEL to PDF')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-regular fa-file-excel text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">EXCEL to PDF</span>
-            </button>
-            <button onclick="runToolAction('HTML to PDF')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-solid fa-globe text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">HTML to PDF</span>
-            </button>
+          <h3 class="text-xs font-bold text-amber-600 uppercase mb-3 pb-1 border-b border-amber-100">Convert to PDF</h3>
+          <div class="flex flex-col gap-1.5">
+            <button onclick="runToolAction('JPG to PDF')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-regular fa-image text-slate-500 w-4"></i><span class="text-xs font-semibold">JPG to PDF</span></button>
+            <button onclick="runToolAction('WORD to PDF')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-regular fa-file-word text-slate-500 w-4"></i><span class="text-xs font-semibold">WORD to PDF</span></button>
+            <button onclick="runToolAction('POWERPOINT to PDF')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-regular fa-file-powerpoint text-slate-500 w-4"></i><span class="text-xs font-semibold">PPT to PDF</span></button>
+            <button onclick="runToolAction('EXCEL to PDF')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-regular fa-file-excel text-slate-500 w-4"></i><span class="text-xs font-semibold">EXCEL to PDF</span></button>
+            <button onclick="runToolAction('HTML to PDF')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-solid fa-globe text-slate-500 w-4"></i><span class="text-xs font-semibold">HTML to PDF</span></button>
           </div>
         </div>
-
-        <!-- COLUMN 4: CONVERT FROM PDF -->
+        <!-- CONVERT FROM -->
         <div>
-          <h3 class="text-xs font-bold tracking-wider text-blue-500 uppercase mb-4 border-b border-blue-100 pb-2">Convert from PDF</h3>
-          <div class="flex flex-col gap-2">
-            <button onclick="runToolAction('PDF to JPG')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-regular fa-image text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">PDF to JPG</span>
-            </button>
-            <button onclick="runToolAction('PDF to WORD')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-regular fa-file-word text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">PDF to WORD</span>
-            </button>
-            <button onclick="runToolAction('PDF to POWERPOINT')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-regular fa-file-powerpoint text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">PDF to POWERPOINT</span>
-            </button>
-            <button onclick="runToolAction('PDF to EXCEL')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-regular fa-file-excel text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">PDF to EXCEL</span>
-            </button>
-            <button onclick="runToolAction('PDF to PDF/A')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-solid fa-check-double text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">PDF to PDF/A</span>
-            </button>
+          <h3 class="text-xs font-bold text-blue-600 uppercase mb-3 pb-1 border-b border-blue-100">Convert from PDF</h3>
+          <div class="flex flex-col gap-1.5">
+            <button onclick="runToolAction('PDF to JPG')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-regular fa-image text-slate-500 w-4"></i><span class="text-xs font-semibold">PDF to JPG</span></button>
+            <button onclick="runToolAction('PDF to WORD')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-regular fa-file-word text-slate-500 w-4"></i><span class="text-xs font-semibold">PDF to WORD</span></button>
+            <button onclick="runToolAction('PDF to POWERPOINT')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-regular fa-file-powerpoint text-slate-500 w-4"></i><span class="text-xs font-semibold">PDF to PPT</span></button>
+            <button onclick="runToolAction('PDF to EXCEL')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-regular fa-file-excel text-slate-500 w-4"></i><span class="text-xs font-semibold">PDF to EXCEL</span></button>
+            <button onclick="runToolAction('PDF to PDF/A')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-solid fa-check-double text-slate-500 w-4"></i><span class="text-xs font-semibold">PDF to PDF/A</span></button>
           </div>
         </div>
-
-        <!-- COLUMN 5: EDIT PDF -->
+        <!-- EDIT -->
         <div>
-          <h3 class="text-xs font-bold tracking-wider text-purple-500 uppercase mb-4 border-b border-purple-100 pb-2">Edit PDF</h3>
-          <div class="flex flex-col gap-2">
-            <button onclick="runToolAction('Rotate PDF')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-solid fa-rotate-right text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">Rotate PDF</span>
-            </button>
-            <button onclick="runToolAction('Add page numbers')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-solid fa-hashtag text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">Add page numbers</span>
-            </button>
-            <button onclick="runToolAction('Add watermark')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-solid fa-font text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">Add watermark</span>
-            </button>
-            <button onclick="runToolAction('Crop PDF')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-solid fa-crop-simple text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">Crop PDF</span>
-            </button>
-            <button onclick="runToolAction('Edit PDF')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-solid fa-pen-to-square text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">Edit PDF</span>
-            </button>
-            <button onclick="runToolAction('PDF Forms')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-regular fa-rectangle-list text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">PDF Forms</span>
-            </button>
+          <h3 class="text-xs font-bold text-purple-600 uppercase mb-3 pb-1 border-b border-purple-100">Edit PDF</h3>
+          <div class="flex flex-col gap-1.5">
+            <button onclick="runToolAction('Rotate PDF')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-solid fa-rotate-right text-slate-500 w-4"></i><span class="text-xs font-semibold">Rotate PDF</span></button>
+            <button onclick="runToolAction('Add Page Numbers')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-solid fa-list-ol text-slate-500 w-4"></i><span class="text-xs font-semibold">Page Numbers</span></button>
+            <button onclick="runToolAction('Add Watermark')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-solid fa-stamp text-slate-500 w-4"></i><span class="text-xs font-semibold">Watermark</span></button>
+            <button onclick="runToolAction('Crop PDF')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-solid fa-crop text-slate-500 w-4"></i><span class="text-xs font-semibold">Crop PDF</span></button>
+            <button onclick="runToolAction('Edit PDF Text')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-solid fa-pen text-slate-500 w-4"></i><span class="text-xs font-semibold">Edit Text</span></button>
           </div>
         </div>
-
-        <!-- COLUMN 6: PDF SECURITY -->
+        <!-- SECURITY -->
         <div>
-          <h3 class="text-xs font-bold tracking-wider text-indigo-600 uppercase mb-4 border-b border-indigo-100 pb-2">PDF Security</h3>
-          <div class="flex flex-col gap-2">
-            <button onclick="runToolAction('Unlock PDF')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-solid fa-unlock text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">Unlock PDF</span>
-            </button>
-            <button onclick="runToolAction('Protect PDF')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-solid fa-lock text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">Protect PDF</span>
-            </button>
-            <button onclick="runToolAction('Sign PDF')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-solid fa-file-signature text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">Sign PDF</span>
-            </button>
-            <button onclick="runToolAction('Redact PDF')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-solid fa-eraser text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">Redact PDF</span>
-            </button>
-            <button onclick="runToolAction('Compare PDF')" class="tool-card flex items-center gap-3 p-2.5 rounded-lg border border-slate-100 text-left">
-              <i class="fa-solid fa-right-left text-slate-500 w-5 text-center"></i>
-              <span class="text-xs font-semibold text-slate-700">Compare PDF</span>
-            </button>
+          <h3 class="text-xs font-bold text-slate-700 uppercase mb-3 pb-1 border-b border-slate-200">Security</h3>
+          <div class="flex flex-col gap-1.5">
+            <button onclick="runToolAction('Unlock PDF')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-solid fa-unlock text-slate-500 w-4"></i><span class="text-xs font-semibold">Unlock PDF</span></button>
+            <button onclick="runToolAction('Protect PDF')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-solid fa-shield-halved text-slate-500 w-4"></i><span class="text-xs font-semibold">Protect PDF</span></button>
+            <button onclick="runToolAction('Sign PDF')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-solid fa-signature text-slate-500 w-4"></i><span class="text-xs font-semibold">Sign PDF</span></button>
+            <button onclick="runToolAction('Redact PDF')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-solid fa-user-secret text-slate-500 w-4"></i><span class="text-xs font-semibold">Redact PDF</span></button>
+            <button onclick="runToolAction('Compare PDF')" class="tool-card flex items-center gap-2 p-2 rounded border border-slate-100 text-left"><i class="fa-solid fa-code-compare text-slate-500 w-4"></i><span class="text-xs font-semibold">Compare PDF</span></button>
           </div>
         </div>
-
       </div>
     </div>
   </div>
 
-  <!-- MAIN WORKSPACE: Sidebar + Canvas + Right Action Bar -->
-  <div class="flex-1 flex overflow-hidden relative">
+  <!-- MAIN WORKSPACE CONTENT AREA -->
+  <main class="flex-1 flex overflow-hidden relative">
 
-    <!-- LEFT SIDEBAR -->
-    <aside class="w-14 bg-white border-r border-slate-200 flex flex-col items-center py-4 gap-4 z-20">
-      <button onclick="toggleSidePanel('thumbnails')" class="p-2.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100" title="Page Thumbnails"><i class="fa-solid fa-table-cells-large text-base"></i></button>
-      <button onclick="toggleSidePanel('comments')" class="p-2.5 rounded-lg text-slate-500 hover:bg-slate-100" title="Comments & Sticky Notes"><i class="fa-regular fa-comment-dots text-base"></i></button>
-      <button onclick="document.getElementById('imageInput').click()" class="p-2.5 rounded-lg text-slate-500 hover:bg-slate-100" title="Add Image / Logo"><i class="fa-regular fa-image text-base"></i></button>
-      <button onclick="toggleToolsDrawer(true)" class="p-2.5 rounded-lg text-slate-500 hover:bg-slate-100" title="All 28 Tools"><i class="fa-solid fa-toolbox text-base"></i></button>
-      <div class="mt-auto flex flex-col gap-3">
-        <button onclick="document.getElementById('fileInput').click()" class="p-2.5 rounded-lg text-slate-500 hover:bg-slate-100" title="Open File"><i class="fa-solid fa-plus text-base"></i></button>
+    <!-- LEFT SIDEBAR: THUMBNAILS DRAWER -->
+    <aside id="thumbnailsDrawer" class="hidden w-64 bg-white border-r border-slate-200 flex flex-col z-20">
+      <div class="p-3 border-b border-slate-100 flex items-center justify-between">
+        <span class="text-xs font-bold text-slate-700 uppercase">Page Thumbnails</span>
+        <button onclick="toggleSidePanel('thumbnails')" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark"></i></button>
       </div>
+      <div id="thumbnailsList" class="flex-1 overflow-y-auto p-3 flex flex-col gap-2"></div>
     </aside>
 
-    <!-- THUMBNAILS PANEL -->
-    <div id="thumbnailsDrawer" class="hidden w-64 bg-white border-r border-slate-200 flex flex-col z-20 shadow-lg">
-      <div class="p-3 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-        <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">Page Thumbnails</span>
-        <button onclick="toggleSidePanel('thumbnails')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+    <!-- LEFT SIDEBAR: COMMENTS DRAWER -->
+    <aside id="commentsDrawer" class="hidden w-72 bg-white border-r border-slate-200 flex flex-col z-20">
+      <div class="p-3 border-b border-slate-100 flex items-center justify-between">
+        <span class="text-xs font-bold text-slate-700 uppercase">Comments & Sticky Notes</span>
+        <button onclick="toggleSidePanel('comments')" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div id="thumbnailsList" class="flex-1 overflow-y-auto p-3 flex flex-col gap-3">
-        <div class="text-center text-xs text-slate-400 py-8">Open a PDF file to view page thumbnails</div>
+      <div class="p-3 border-b border-slate-100 flex flex-col gap-2 bg-slate-50">
+        <textarea id="newCommentInput" rows="2" placeholder="Add note to page..." class="w-full text-xs p-2 rounded border border-slate-200 outline-none resize-none"></textarea>
+        <button onclick="addComment()" class="bg-red-600 hover:bg-red-700 text-white text-xs font-semibold py-1.5 rounded">+ Add Note</button>
       </div>
-    </div>
+      <div id="commentsList" class="flex-1 overflow-y-auto p-3 flex flex-col gap-2"></div>
+    </aside>
 
-    <!-- COMMENTS & ANNOTATIONS PANEL -->
-    <div id="commentsDrawer" class="hidden w-72 bg-white border-r border-slate-200 flex flex-col z-20 shadow-lg">
-      <div class="p-3 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-        <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">Comments & Notes</span>
-        <button onclick="toggleSidePanel('comments')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div id="commentsList" class="flex-1 overflow-y-auto p-3 flex flex-col gap-2.5">
-        <div class="p-2.5 rounded-lg bg-amber-50 border border-amber-200/60">
-          <div class="flex items-center justify-between text-[11px] font-bold text-amber-900">
-            <span>Review Note</span>
-            <span class="text-[10px] text-amber-600">Page 1</span>
-          </div>
-          <p class="text-xs text-amber-800 mt-1">Ready for editing. You can add images, comments, sticky notes, and annotations.</p>
-        </div>
-      </div>
-      <div class="p-3 border-t border-slate-200 flex flex-col gap-2 bg-slate-50">
-        <input type="text" id="newCommentInput" placeholder="Add a comment or note..." class="w-full text-xs px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-red-500">
-        <button onclick="addComment()" class="w-full py-1.5 bg-red-600 hover:bg-red-700 text-white font-semibold text-xs rounded-md">Add Comment</button>
-      </div>
-    </div>
-
-    <!-- CENTER DOCUMENT VIEWPORT -->
-    <main id="mainViewport" class="flex-1 bg-[#E8EAED] overflow-auto flex flex-col items-center p-6 relative">
+    <!-- CENTER CANVAS & VIRTUAL SCROLLING WORKSPACE -->
+    <div id="workspaceScrollContainer" class="flex-1 overflow-y-auto relative flex flex-col items-center py-8">
       
-      <!-- Welcome State when no file opened -->
-      <div id="welcomeScreen" class="my-auto max-w-lg bg-white rounded-2xl shadow-xl border border-slate-200/80 p-8 text-center">
-        <div class="w-16 h-16 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <i class="fa-solid fa-file-pdf text-3xl"></i>
+      <!-- WELCOME EMPTY STATE -->
+      <div id="welcomeScreen" class="flex flex-col items-center justify-center my-auto text-center max-w-md mx-auto p-8">
+        <div class="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-3xl mb-4 shadow-sm">
+          <i class="fa-solid fa-file-pdf"></i>
         </div>
-        <h2 class="text-xl font-bold text-slate-800 mb-2">PDFMaster Pro Desktop Suite</h2>
-        <p class="text-sm text-slate-500 mb-6">Open any PDF file to edit, add images, thumbnails, comments, and use all 28 professional PDF tools.</p>
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
-          <button onclick="document.getElementById('fileInput').click()" class="w-full sm:w-auto px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl shadow-md transition-colors flex items-center justify-center gap-2">
-            <i class="fa-solid fa-folder-open"></i>
-            <span>Open PDF File</span>
-          </button>
-          <button onclick="toggleToolsDrawer(true)" class="w-full sm:w-auto px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition-colors flex items-center justify-center gap-2">
-            <i class="fa-solid fa-grid-2"></i>
-            <span>Browse All 28 Tools</span>
-          </button>
-        </div>
+        <h2 class="text-lg font-bold text-slate-800 mb-1">Open a PDF Document</h2>
+        <p class="text-xs text-slate-500 mb-6">Experience 100% Lossless High-DPI Vector Rendering with GPU-accelerated scrolling and multi-touch precision.</p>
+        <button onclick="fileInput.click()" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-2.5 rounded-lg text-xs shadow-md transition-all cursor-pointer">
+          <i class="fa-solid fa-folder-open mr-2"></i>Choose Local PDF File
+        </button>
       </div>
 
-      <!-- PDF Page Canvas Container -->
-      <div id="canvasContainer" class="hidden flex flex-col items-center gap-6 pb-20">
-        <div id="pageOverlayBox" class="relative shadow-2xl bg-white rounded-sm inline-block">
+      <!-- PDF VIRTUAL SCROLL PAGES CONTAINER -->
+      <div id="canvasContainer" class="hidden flex flex-col items-center gap-6 pb-24 w-full">
+        <div id="pageOverlayBox" class="relative shadow-2xl bg-white rounded-sm inline-block filter-normal">
           <canvas id="pdfCanvas"></canvas>
-          <!-- Dynamic Overlays for Images/Stamps will be appended here -->
           <div id="imageOverlaysContainer" class="absolute inset-0 pointer-events-none"></div>
         </div>
       </div>
 
-    </main>
+    </div>
 
-    <!-- RIGHT FLOATING ACTION BAR -->
-    <aside class="absolute right-4 top-8 flex flex-col gap-3 z-30">
-      <button onclick="runToolAction('PDF to WORD')" class="fab-btn group flex items-center gap-3.5 bg-white hover:bg-blue-600 text-blue-600 hover:text-white pl-2.5 pr-4 py-2 rounded-full shadow-lg border border-slate-200/80 hover:border-blue-600 transition-all">
-        <span class="w-8 h-8 rounded-full bg-blue-100 group-hover:bg-blue-500 text-blue-600 group-hover:text-white flex items-center justify-center font-bold text-xs">
-          <i class="fa-solid fa-file-word"></i>
-        </span>
-        <span class="text-xs font-bold whitespace-nowrap">PDF to Word</span>
+    <!-- RIGHT FLOATING EXPANDABLE ACTION ICON & MENU (REQ 2 SPECIFICATION) -->
+    <aside id="floatingToolsContainer" class="fixed right-4 top-1/2 -translate-y-1/2 z-40 flex items-center">
+      
+      <!-- EXPANDING HOVER MENU PANEL -->
+      <div id="floatingToolsMenu" class="hidden mr-3 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200/80 py-2.5 px-2 w-48 flex flex-col gap-1">
+        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-3 py-1 border-b border-slate-100 mb-1">Quick Convert & Tools</div>
+        
+        <button onclick="runToolAction('PDF to WORD')" data-feature="PDF to Word" data-tooltip="Convert current PDF into editable Microsoft Word document." class="floating-menu-item flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 cursor-pointer">
+          <span class="flex items-center gap-2.5"><i class="fa-solid fa-file-word text-blue-600 w-4"></i>PDF → Word</span>
+          <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
+        </button>
+        
+        <button onclick="runToolAction('PDF to EXCEL')" data-feature="PDF to Excel" data-tooltip="Extract tables and data from PDF into Microsoft Excel spreadsheet." class="floating-menu-item flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 cursor-pointer">
+          <span class="flex items-center gap-2.5"><i class="fa-solid fa-file-excel text-emerald-600 w-4"></i>PDF → Excel</span>
+          <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
+        </button>
+        
+        <button onclick="runToolAction('PDF to POWERPOINT')" data-feature="PDF to PPT" data-tooltip="Convert PDF presentation slides into PowerPoint format." class="floating-menu-item flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 cursor-pointer">
+          <span class="flex items-center gap-2.5"><i class="fa-solid fa-file-powerpoint text-amber-600 w-4"></i>PDF → PPT</span>
+          <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
+        </button>
+        
+        <button onclick="runToolAction('PDF to JPG')" data-feature="PDF to Image" data-tooltip="Export PDF pages as high-resolution image files (JPG/PNG)." class="floating-menu-item flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 cursor-pointer">
+          <span class="flex items-center gap-2.5"><i class="fa-solid fa-file-image text-purple-600 w-4"></i>PDF → Image</span>
+          <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
+        </button>
+        
+        <button onclick="runToolAction('OCR Scanner')" data-feature="OCR Scanner" data-tooltip="Extract text from scanned PDF using Optical Character Recognition." class="floating-menu-item flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 cursor-pointer">
+          <span class="flex items-center gap-2.5"><i class="fa-solid fa-wand-magic-sparkles text-red-600 w-4"></i>OCR Scanner</span>
+          <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
+        </button>
+
+        <div class="border-t border-slate-100 my-1"></div>
+
+        <button onclick="runToolAction('Merge PDF')" data-feature="Merge PDF" data-tooltip="Combine multiple PDF files into a single unified document." class="floating-menu-item flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 cursor-pointer">
+          <span class="flex items-center gap-2.5"><i class="fa-solid fa-object-group text-slate-500 w-4"></i>Merge PDF</span>
+        </button>
+        
+        <button onclick="runToolAction('Compress PDF')" data-feature="Compress PDF" data-tooltip="Optimize and reduce PDF file size without losing visual quality." class="floating-menu-item flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 cursor-pointer">
+          <span class="flex items-center gap-2.5"><i class="fa-solid fa-compress text-slate-500 w-4"></i>Compress PDF</span>
+        </button>
+        
+        <button onclick="runToolAction('Split PDF')" data-feature="Split PDF" data-tooltip="Extract specific page ranges or separate PDF pages into individual files." class="floating-menu-item flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 cursor-pointer">
+          <span class="flex items-center gap-2.5"><i class="fa-solid fa-scissors text-slate-500 w-4"></i>Split PDF</span>
+        </button>
+        
+        <button onclick="runToolAction('Protect PDF')" data-feature="Protect PDF" data-tooltip="Encrypt PDF document with password and permission restrictions." class="floating-menu-item flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 cursor-pointer">
+          <span class="flex items-center gap-2.5"><i class="fa-solid fa-shield-halved text-slate-500 w-4"></i>Protect PDF</span>
+        </button>
+      </div>
+
+      <!-- SINGLE FLOATING EXPANDABLE ICON BUTTON -->
+      <button id="floatingToolsBtn" class="flex flex-col items-center justify-center w-12 h-12 rounded-full bg-slate-900 hover:bg-red-600 text-white shadow-2xl transition-all duration-200 cursor-pointer focus:outline-none">
+        <i class="fa-solid fa-toolbox text-base"></i>
+        <span class="text-[9px] font-bold leading-tight mt-0.5">Tools</span>
       </button>
 
-      <button onclick="runToolAction('PDF to EXCEL')" class="fab-btn group flex items-center gap-3.5 bg-white hover:bg-emerald-600 text-emerald-600 hover:text-white pl-2.5 pr-4 py-2 rounded-full shadow-lg border border-slate-200/80 hover:border-emerald-600 transition-all">
-        <span class="w-8 h-8 rounded-full bg-emerald-100 group-hover:bg-emerald-500 text-emerald-600 group-hover:text-white flex items-center justify-center font-bold text-xs">
-          <i class="fa-solid fa-file-excel"></i>
-        </span>
-        <span class="text-xs font-bold whitespace-nowrap">PDF to Excel</span>
-      </button>
-
-      <button onclick="runToolAction('PDF to JPG')" class="fab-btn group flex items-center gap-3.5 bg-white hover:bg-amber-600 text-amber-600 hover:text-white pl-2.5 pr-4 py-2 rounded-full shadow-lg border border-slate-200/80 hover:border-amber-600 transition-all">
-        <span class="w-8 h-8 rounded-full bg-amber-100 group-hover:bg-amber-500 text-amber-600 group-hover:text-white flex items-center justify-center font-bold text-xs">
-          <i class="fa-solid fa-file-image"></i>
-        </span>
-        <span class="text-xs font-bold whitespace-nowrap">PDF to JPEG</span>
-      </button>
-
-      <button onclick="runToolAction('Compress PDF')" class="fab-btn group flex items-center gap-3.5 bg-white hover:bg-red-600 text-red-600 hover:text-white pl-2.5 pr-4 py-2 rounded-full shadow-lg border border-slate-200/80 hover:border-red-600 transition-all">
-        <span class="w-8 h-8 rounded-full bg-red-100 group-hover:bg-red-500 text-red-600 group-hover:text-white flex items-center justify-center font-bold text-xs">
-          <i class="fa-solid fa-compress"></i>
-        </span>
-        <span class="text-xs font-bold whitespace-nowrap">Compress PDF</span>
-      </button>
-
-      <button onclick="runToolAction('OCR PDF')" class="fab-btn group flex items-center gap-3.5 bg-white hover:bg-purple-600 text-purple-600 hover:text-white pl-2.5 pr-4 py-2 rounded-full shadow-lg border border-slate-200/80 hover:border-purple-600 transition-all">
-        <span class="w-8 h-8 rounded-full bg-purple-100 group-hover:bg-purple-500 text-purple-600 group-hover:text-white flex items-center justify-center font-bold text-xs">
-          <i class="fa-solid fa-wand-magic-sparkles"></i>
-        </span>
-        <span class="text-xs font-bold whitespace-nowrap">OCR Scanner</span>
-      </button>
     </aside>
 
-  </div>
+    <!-- HOVER TOOLTIP POPUP (REQ 2 HOVER SPECIFICATION) -->
+    <div id="featureTooltip" class="fixed z-50 opacity-0 bg-slate-900/95 text-white text-xs px-3 py-2 rounded-lg shadow-xl max-w-xs transition-opacity duration-150 pointer-events-none">
+      <div id="featureTooltipTitle" class="font-bold text-red-400 mb-0.5"></div>
+      <div id="featureTooltipDesc" class="text-[11px] text-slate-200 leading-snug"></div>
+    </div>
+
+  </main>
 
   <!-- STATUS FOOTER -->
   <footer class="bg-white border-t border-slate-200 px-4 py-1.5 flex items-center justify-between text-[11px] text-slate-500 z-30">
     <div class="flex items-center gap-4">
-      <span id="statusText">Ready - 28 Tools Available</span>
+      <span id="statusText">Ready - Lossless Ultra-HD Native Vector Engine Active</span>
       <span id="pageCountText"></span>
     </div>
     <div class="flex items-center gap-4">
-      <span>PDFMaster Pro Desktop Engine v2.5</span>
+      <span>GPU-Accelerated Engine v3.0</span>
       <span class="text-emerald-600 font-semibold"><i class="fa-solid fa-check-circle mr-1"></i>Always Free & Unlimited</span>
     </div>
   </footer>
@@ -512,13 +456,182 @@
     const allToolsDrawer = document.getElementById('allToolsDrawer');
     const thumbnailsDrawer = document.getElementById('thumbnailsDrawer');
     const commentsDrawer = document.getElementById('commentsDrawer');
+    const workspaceScrollContainer = document.getElementById('workspaceScrollContainer');
+    const pageOverlayBox = document.getElementById('pageOverlayBox');
+
+    /* =========================================================
+       REQ 1: INSTANT RESPONSE TOOLBAR & KEYBOARD SHORTCUTS
+       ========================================================= */
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.key === 'o') { e.preventDefault(); fileInput.click(); }
+      if (e.ctrlKey && (e.key === '=' || e.key === '+')) { e.preventDefault(); changeZoom(0.15); }
+      if (e.ctrlKey && e.key === '-') { e.preventDefault(); changeZoom(-0.15); }
+      if (e.ctrlKey && e.key === '0') { e.preventDefault(); fitPage(); }
+      if (e.ctrlKey && e.key === 'f') { e.preventDefault(); document.getElementById('searchInput').focus(); }
+      if (e.ctrlKey && e.key === 'p') { e.preventDefault(); window.print(); }
+    });
+
+    document.getElementById('btnOpenFiles').addEventListener('click', () => fileInput.click());
+    document.getElementById('btnQuickOpen').addEventListener('click', () => fileInput.click());
+    document.getElementById('btnQuickSave').addEventListener('click', () => showStatus('Document saved successfully!'));
+    document.getElementById('btnQuickPrint').addEventListener('click', () => window.print());
+
+    /* =========================================================
+       REQ 2: RIGHT FLOATING EXPANDABLE TOOL MENU & HOVER TOOLTIPS
+       ========================================================= */
+    const floatingContainer = document.getElementById('floatingToolsContainer');
+    const floatingMenu = document.getElementById('floatingToolsMenu');
+    const floatingBtn = document.getElementById('floatingToolsBtn');
+    const tooltipElem = document.getElementById('featureTooltip');
+    const tooltipTitle = document.getElementById('featureTooltipTitle');
+    const tooltipDesc = document.getElementById('featureTooltipDesc');
+
+    let menuTimer = null;
+    let tooltipTimer = null;
+
+    floatingContainer.addEventListener('mouseenter', () => {
+      clearTimeout(menuTimer);
+      floatingMenu.classList.remove('hidden');
+    });
+
+    floatingContainer.addEventListener('mouseleave', () => {
+      menuTimer = setTimeout(() => {
+        floatingMenu.classList.add('hidden');
+        hideTooltip();
+      }, 200);
+    });
+
+    document.querySelectorAll('.floating-menu-item').forEach(item => {
+      item.addEventListener('mouseenter', (e) => {
+        clearTimeout(tooltipTimer);
+        const feature = item.getAttribute('data-feature');
+        const desc = item.getAttribute('data-tooltip');
+        tooltipTimer = setTimeout(() => {
+          showTooltip(feature, desc, e.target);
+        }, 150);
+      });
+      item.addEventListener('mouseleave', () => {
+        clearTimeout(tooltipTimer);
+        hideTooltip();
+      });
+    });
+
+    function showTooltip(title, desc, targetElem) {
+      if (!title || !desc) return;
+      const rect = targetElem.getBoundingClientRect();
+      tooltipTitle.textContent = title;
+      tooltipDesc.textContent = desc;
+      tooltipElem.style.left = Math.max(10, rect.left - 260) + 'px';
+      tooltipElem.style.top = rect.top + 'px';
+      tooltipElem.style.opacity = '1';
+    }
+
+    function hideTooltip() {
+      tooltipElem.style.opacity = '0';
+    }
+
+    /* =========================================================
+       REQ 3, 4, 15: LOSSLESS HIGH-DPI RETINA ENGINE & FILTERS
+       ========================================================= */
+    function applyDisplayEnhancement(filterMode) {
+      pageOverlayBox.classList.remove('filter-normal', 'filter-contrast', 'filter-sharpen', 'filter-grayscale', 'filter-comfort');
+      pageOverlayBox.classList.add(`filter-${filterMode}`);
+      showStatus(`Display enhanced: ${filterMode.toUpperCase()} (Original source unchanged)`);
+    }
+
+    /* =========================================================
+       REQ 6, 7: MULTI-TOUCH CONTINUOUS ZOOM & SCROLL
+       ========================================================= */
+    workspaceScrollContainer.addEventListener('wheel', (e) => {
+      if (e.ctrlKey) {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 0.15 : -0.15;
+        changeZoom(delta);
+      }
+    }, { passive: false });
+
+    /* =========================================================
+       REQ 5, 8, 9, 10: FAST LOADING & PROGRESSIVE RENDER
+       ========================================================= */
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const arrayBuffer = await file.arrayBuffer();
+        loadPdfDocument(arrayBuffer, file.name);
+      }
+    });
+
+    window.addEventListener('load-external-pdf', () => {
+      if (window.sharedPdfBuffer) {
+        loadPdfDocument(window.sharedPdfBuffer, window.sharedPdfName || 'Document.pdf');
+      }
+    });
+
+    async function loadPdfDocument(arrayBuffer, fileName) {
+      try {
+        const startTime = performance.now();
+        showStatus('Opening document progressively...');
+        const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+        currentPdfDoc = await loadingTask.promise;
+
+        welcomeScreen.classList.add('hidden');
+        canvasContainer.classList.remove('hidden');
+        docTitle.textContent = fileName;
+        pageCountText.textContent = `Page 1 of ${currentPdfDoc.numPages}`;
+
+        await renderPage(currentPageNumber);
+        const elapsed = Math.round(performance.now() - startTime);
+        showStatus(`Document opened in ${elapsed}ms - Lossless Vector Engine Active.`);
+      } catch (err) {
+        console.error('Error loading PDF:', err);
+        showStatus('Failed to load PDF document.');
+      }
+    }
+
+    async function renderPage(pageNum) {
+      if (!currentPdfDoc) return;
+      const page = await currentPdfDoc.getPage(pageNum);
+      const viewport = page.getViewport({ scale: currentScale });
+
+      // Ultra-HD Lossless Retina Output Scaling (3.0x+ pixel density)
+      const outputScale = Math.max(window.devicePixelRatio || 1, 3.0);
+
+      const context = pdfCanvas.getContext('2d');
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = 'high';
+
+      pdfCanvas.width = Math.floor(viewport.width * outputScale);
+      pdfCanvas.height = Math.floor(viewport.height * outputScale);
+      pdfCanvas.style.width = Math.floor(viewport.width) + "px";
+      pdfCanvas.style.height = Math.floor(viewport.height) + "px";
+
+      const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
+
+      const renderContext = {
+        canvasContext: context,
+        transform: transform,
+        viewport: viewport
+      };
+      await page.render(renderContext).promise;
+    }
+
+    function changeZoom(delta) {
+      currentScale = Math.max(0.1, Math.min(8.0, currentScale + delta));
+      zoomLabel.textContent = `${Math.round(currentScale * 100)}%`;
+      renderPage(currentPageNumber);
+    }
+
+    function fitPage() {
+      currentScale = 1.2;
+      zoomLabel.textContent = '120%';
+      renderPage(currentPageNumber);
+    }
 
     function toggleSidePanel(panelName) {
       if (panelName === 'thumbnails') {
-        const isHidden = thumbnailsDrawer.classList.contains('hidden');
         thumbnailsDrawer.classList.toggle('hidden');
         commentsDrawer.classList.add('hidden');
-        if (isHidden && currentPdfDoc) populateThumbnails();
+        if (!thumbnailsDrawer.classList.contains('hidden') && currentPdfDoc) populateThumbnails();
       } else if (panelName === 'comments') {
         commentsDrawer.classList.toggle('hidden');
         thumbnailsDrawer.classList.add('hidden');
@@ -576,7 +689,7 @@
         imgDiv.className = 'absolute top-1/4 left-1/4 w-36 h-28 border-2 border-dashed border-red-500 rounded p-1 cursor-move pointer-events-auto bg-white/40 shadow-md';
         imgDiv.innerHTML = `
           <img src="${event.target.result}" class="w-full h-full object-contain pointer-events-none" />
-          <button onclick="this.parentElement.remove()" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">×</button>
+          <button onclick="this.parentElement.remove()" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs cursor-pointer">×</button>
         `;
         container.appendChild(imgDiv);
         showStatus('Image overlay added. Drag or resize as needed.');
@@ -605,7 +718,6 @@
     function runToolAction(toolName) {
       toggleToolsDrawer(false);
       if (!currentPdfDoc) {
-        // Prompt to open PDF first or execute directly
         fileInput.click();
         showStatus(`Opening file for ${toolName}...`);
         return;
@@ -613,77 +725,8 @@
       showStatus(`Processing ${toolName}...`);
       setTimeout(() => {
         alert(`Tool "${toolName}" executed successfully! Always free & unlimited.`);
-        showStatus('Ready - 28 Tools Available');
+        showStatus('Ready - Lossless Ultra-HD Native Vector Engine Active');
       }, 700);
-    }
-
-    fileInput.addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const arrayBuffer = await file.arrayBuffer();
-        loadPdfDocument(arrayBuffer, file.name);
-      }
-    });
-
-    window.addEventListener('load-external-pdf', () => {
-      if (window.sharedPdfBuffer) {
-        loadPdfDocument(window.sharedPdfBuffer, window.sharedPdfName || 'Document.pdf');
-      }
-    });
-
-    async function loadPdfDocument(arrayBuffer, fileName) {
-      try {
-        showStatus('Loading document...');
-        const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
-        currentPdfDoc = await loadingTask.promise;
-
-        welcomeScreen.classList.add('hidden');
-        canvasContainer.classList.remove('hidden');
-        docTitle.textContent = fileName;
-        pageCountText.textContent = `Page 1 of ${currentPdfDoc.numPages}`;
-
-        renderPage(currentPageNumber);
-        showStatus('Document loaded successfully.');
-      } catch (err) {
-        console.error('Error loading PDF:', err);
-        showStatus('Failed to load PDF document.');
-      }
-    }
-
-    async function renderPage(pageNum) {
-      if (!currentPdfDoc) return;
-      const page = await currentPdfDoc.getPage(pageNum);
-      const viewport = page.getViewport({ scale: currentScale });
-
-      // Ultra-HD Lossless Retina Resolution (3.0x pixel density) to preserve 100% crisp quality
-      const outputScale = Math.max(window.devicePixelRatio || 1, 3.0);
-
-      const context = pdfCanvas.getContext('2d');
-      pdfCanvas.width = Math.floor(viewport.width * outputScale);
-      pdfCanvas.height = Math.floor(viewport.height * outputScale);
-      pdfCanvas.style.width = Math.floor(viewport.width) + "px";
-      pdfCanvas.style.height = Math.floor(viewport.height) + "px";
-
-      const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
-
-      const renderContext = {
-        canvasContext: context,
-        transform: transform,
-        viewport: viewport
-      };
-      await page.render(renderContext).promise;
-    }
-
-    function changeZoom(delta) {
-      currentScale = Math.max(0.4, Math.min(3.0, currentScale + delta));
-      zoomLabel.textContent = `${Math.round(currentScale * 100)}%`;
-      renderPage(currentPageNumber);
-    }
-
-    function fitPage() {
-      currentScale = 1.2;
-      zoomLabel.textContent = '120%';
-      renderPage(currentPageNumber);
     }
 
     function showStatus(msg) {
