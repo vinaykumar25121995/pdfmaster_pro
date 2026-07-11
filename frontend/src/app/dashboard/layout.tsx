@@ -59,6 +59,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, [pathname]);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as any).electronAPI) {
+      const electronAPI = (window as any).electronAPI;
+      if (electronAPI.onOpenExternalPdf) {
+        electronAPI.onOpenExternalPdf((data: { fileName: string; filePath: string; base64Data: string }) => {
+          try {
+            const binaryString = atob(data.base64Data);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+              bytes[i] = binaryString.charCodeAt(i);
+            }
+            (window as any).sharedPdfBuffer = bytes.buffer;
+            (window as any).sharedPdfName = data.fileName;
+            router.push('/dashboard/editor');
+          } catch (err) {
+            console.error('Error loading external PDF:', err);
+          }
+        });
+      }
+    }
+  }, [router]);
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');

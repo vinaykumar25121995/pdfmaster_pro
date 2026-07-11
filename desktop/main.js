@@ -5,6 +5,40 @@ const { autoUpdater } = require('electron-updater');
 
 let mainWindow;
 
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.focus();
+      handleCommandLineArgs(commandLine);
+    }
+  });
+}
+
+function handleCommandLineArgs(args) {
+  if (!args || !Array.isArray(args)) return;
+  const pdfArg = args.find(arg => arg && typeof arg === 'string' && arg.toLowerCase().endsWith('.pdf'));
+  if (pdfArg && fs.existsSync(pdfArg)) {
+    try {
+      const data = fs.readFileSync(pdfArg);
+      const base64Data = data.toString('base64');
+      const fileName = path.basename(pdfArg);
+      if (mainWindow && mainWindow.webContents) {
+        mainWindow.webContents.send('open-external-pdf', {
+          fileName,
+          filePath: pdfArg,
+          base64Data
+        });
+      }
+    } catch (err) {
+      console.error('Error opening file:', err);
+    }
+  }
+}
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1280,
@@ -20,24 +54,24 @@ function createWindow() {
     },
   });
 
-  // In production, we load the Next.js production build: dist/index.html
-  // In development, we load the local live server
   const startUrl = process.env.NODE_ENV === 'development' 
     ? 'http://localhost:3000' 
     : 'https://ilovepdfmaster.vercel.app';
 
   mainWindow.loadURL(startUrl).catch(() => {
-    // If offline or network error, load local offline core
     mainWindow.loadFile(path.join(__dirname, 'offline.html'));
   });
 
+  mainWindow.webContents.on('did-finish-load', () => {
+    handleCommandLineArgs(process.argv);
+  });
+
   mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
-    if (errorCode !== -3) { // ignore aborted loads
+    if (errorCode !== -3) {
       mainWindow.loadFile(path.join(__dirname, 'offline.html'));
     }
   });
 
-  // Open DevTools in development mode
   if (process.env.NODE_ENV === 'development') {
     mainWindow.webContents.openDevTools();
   }

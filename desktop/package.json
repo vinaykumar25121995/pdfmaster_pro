@@ -20,6 +20,15 @@
   "build": {
     "appId": "com.pdfmaster.pro",
     "productName": "PDFMaster Pro",
+    "fileAssociations": [
+      {
+        "ext": "pdf",
+        "name": "PDF Document",
+        "description": "PDF Document handled by PDFMaster Pro",
+        "icon": "icon.ico",
+        "role": "Editor"
+      }
+    ],
     "win": {
       "target": "nsis",
       "icon": "icon.ico"
@@ -28,7 +37,10 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "runAfterFinish": true
+      "createStartMenuShortcut": true,
+      "runAfterFinish": true,
+      "perMachine": false,
+      "include": "installer.nsh"
     },
     "mac": {
       "target": [
