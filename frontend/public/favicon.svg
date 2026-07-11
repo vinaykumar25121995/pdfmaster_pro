@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Deep Red Brushed Metallic Background -->
+    <radialGradient id="bgGrad" cx="50%" cy="40%" r="65%">
+      <stop offset="0%" stop-color="#C8102E" />
+      <stop offset="60%" stop-color="#8B0A1E" />
+      <stop offset="100%" stop-color="#4A040F" />
+    </radialGradient>
+
+    <!-- 3D Metallic Silver Sheen -->
+    <linearGradient id="silverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="25%" stop-color="#E2E8F0" />
+      <stop offset="50%" stop-color="#94A3B8" />
+      <stop offset="75%" stop-color="#F8FAFC" />
+      <stop offset="100%" stop-color="#64748B" />
+    </linearGradient>
+
+    <!-- Ruby Gemstone Heart -->
+    <radialGradient id="rubyGrad" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#FF4D6D" />
+      <stop offset="50%" stop-color="#C9184A" />
+      <stop offset="100%" stop-color="#590D22" />
+    </radialGradient>
+
+    <!-- Drop Shadow for 3D Relief -->
+    <filter id="shadow3d" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#000000" flood-opacity="0.65" />
+    </filter>
+  </defs>
+
+  <!-- Background Squircle -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+
+  <!-- 3D Silver Acrobat Ribbon Icon -->
+  <g filter="url(#shadow3d)">
+    <path
+      d="M236 178C236 136 242 92 258 92C274 92 277 128 262 178C244 234 208 296 168 340C138 376 112 388 102 376C92 364 104 334 132 312C162 286 214 270 274 276C334 282 388 290 404 272C420 254 392 236 344 246C296 256 254 242 236 178Z"
+      stroke="url(#silverGrad)"
+      stroke-width="34"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      fill="none"
+    />
+    <path
+      d="M238 108C238 78 264 74 274 94C284 114 278 160 258 212L194 330C178 360 148 386 128 380C108 374 108 344 128 318C148 292 200 272 258 272L330 286C378 296 408 296 414 270C420 244 388 234 352 244C316 254 276 260 238 220"
+      stroke="url(#silverGrad)"
+      stroke-width="24"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      fill="none"
+    />
+  </g>
+
+  <!-- I ❤️ Typography -->
+  <g filter="url(#shadow3d)">
+    <text x="210" y="325" font-family="Arial, sans-serif" font-weight="900" font-size="46" fill="url(#silverGrad)" text-anchor="middle">I</text>
+    <!-- Ruby Gem Heart -->
+    <path
+      d="M260 326 L238 304 C224 290 220 274 232 262 C244 250 260 254 260 268 C260 254 276 250 288 262 C300 274 296 290 282 304 Z"
+      fill="url(#rubyGrad)"
+      stroke="url(#silverGrad)"
+      stroke-width="3"
+    />
+  </g>
+
+  <!-- PDFMaster Silver 3D Typography -->
+  <text
+    x="256"
+    y="398"
+    font-family="Arial, sans-serif"
+    font-weight="900"
+    font-size="64"
+    fill="url(#silverGrad)"
+    text-anchor="middle"
+    letter-spacing="1.5"
+    filter="url(#shadow3d)"
+  >PDFMaster</text>
+
+  <!-- VIEW & EDIT Metallic Pill Badge -->
+  <g filter="url(#shadow3d)">
+    <rect x="116" y="424" width="280" height="52" rx="16" fill="url(#silverGrad)" stroke="#FFFFFF" stroke-width="2" />
+    <text
+      x="256"
+      y="459"
+      font-family="Arial, sans-serif"
+      font-weight="900"
+      font-size="30"
+      fill="#590D22"
+      text-anchor="middle"
+      letter-spacing="3"
+    >VIEW &amp; EDIT</text>
+  </g>
+</svg>

@@ -7,6 +7,12 @@ export const metadata: Metadata = {
   description: 'Professional PDF tools powered by advanced OCR and AI technology. Edit text, annotate documents, merge, split, and convert file formats online or offline.',
   keywords: ['PDF Editor', 'OCR PDF', 'PDF Reader', 'PDF Converter', 'Edit PDF Online', 'PDF Merge', 'PDF Split', 'E-Signature'],
   authors: [{ name: 'DeepMind Advanced Agentic Coding team' }],
+  manifest: '/manifest.json',
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
   viewport: 'width=device-width, initial-scale=1',
   robots: 'index, follow',
 };

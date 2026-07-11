@@ -22,7 +22,7 @@
     "productName": "PDFMaster Pro",
     "win": {
       "target": "nsis",
-      "icon": "icon.ico"
+      "icon": "icon.svg"
     },
     "nsis": {
       "oneClick": false,

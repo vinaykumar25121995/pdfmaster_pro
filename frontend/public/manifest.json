@@ -1,0 +1,17 @@
+{
+  "name": "PDFMaster Pro",
+  "short_name": "PDFMaster",
+  "description": "Professional PDF tools powered by advanced OCR and AI technology.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#C8102E",
+  "theme_color": "#C8102E",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192 512x512 any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

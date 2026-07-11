@@ -12,6 +12,7 @@ function createWindow() {
     minWidth: 900,
     minHeight: 600,
     title: "PDFMaster Pro Desktop",
+    icon: path.join(__dirname, 'icon.svg'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
