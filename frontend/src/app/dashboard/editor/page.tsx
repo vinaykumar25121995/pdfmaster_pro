@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { 
   MousePointer, Type, Square, Circle, ArrowRight, Minus, 
   Trash2, Palette, Save, Pen, MessageSquare, Upload, ChevronLeft, ChevronRight,
-  FileText, Undo, Redo, Move
+  FileText, Undo, Redo, Move, Image as ImageIcon, LayoutGrid
 } from 'lucide-react';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
@@ -1234,12 +1234,14 @@ export default function PDFEditor() {
               { id: 'select', icon: <MousePointer className="h-4 w-4" />, label: 'Select' },
               { id: 'edit-pdf-text', icon: <FileText className="h-4 w-4" />, label: 'Edit PDF Text' },
               { id: 'text', icon: <Type className="h-4 w-4" />, label: 'Add Text' },
+              { id: 'image', icon: <ImageIcon className="h-4 w-4 text-emerald-600" />, label: 'Add Image / Stamp' },
+              { id: 'thumbnails', icon: <LayoutGrid className="h-4 w-4 text-blue-600" />, label: 'Page Thumbnails' },
               { id: 'pencil', icon: <Pen className="h-4 w-4" />, label: 'Draw' },
               { id: 'rect', icon: <Square className="h-4 w-4" />, label: 'Rectangle' },
               { id: 'circle', icon: <Circle className="h-4 w-4" />, label: 'Circle' },
               { id: 'arrow', icon: <ArrowRight className="h-4 w-4" />, label: 'Arrow' },
               { id: 'line', icon: <Minus className="h-4 w-4" />, label: 'Line' },
-              { id: 'comment', icon: <MessageSquare className="h-4 w-4" />, label: 'Note' }
+              { id: 'comment', icon: <MessageSquare className="h-4 w-4 text-amber-500" />, label: 'Comments / Note' }
             ].map(tool => (
               <button 
                 key={tool.id}
