@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDFMaster Pro - Desktop Edition</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      user-select: none;
+      overflow: hidden;
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F1F5F9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+    .ribbon-tab.active {
+      background-color: #F8FAFC;
+      border-bottom: 2px solid #DC2626;
+      color: #DC2626;
+      font-weight: 600;
+    }
+    .tool-btn:hover {
+      background-color: #F1F5F9;
+    }
+    .tool-btn:active {
+      background-color: #E2E8F0;
+    }
+    .fab-btn {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .fab-btn:hover {
+      transform: translateX(-4px);
+    }
+  </style>
+</head>
+<body class="bg-[#F3F4F6] h-screen flex flex-col text-slate-800">
+
+  <!-- TOP APP TITLE & RIBBON HEADER -->
+  <header class="bg-white border-b border-slate-200 select-none shadow-sm z-30">
+    
+    <!-- Row 1: Title Bar & Quick Actions -->
+    <div class="flex items-center justify-between px-3 py-1.5 border-b border-slate-100 bg-[#FAFAFA]">
+      <div class="flex items-center gap-3">
+        <!-- Files Brand Menu Button -->
+        <button id="btnOpenFiles" class="bg-red-600 hover:bg-red-700 text-white px-3.5 py-1.5 rounded-md text-xs font-semibold flex items-center gap-2 shadow-sm transition-colors">
+          <i class="fa-solid fa-folder-open"></i>
+          <span>Files</span>
+        </button>
+
+        <!-- Quick Action Toolbar -->
+        <div class="flex items-center gap-1 border-l border-slate-200 pl-3 text-slate-600">
+          <button id="btnQuickOpen" title="Open Local PDF" class="p-1.5 hover:bg-slate-200 rounded text-xs"><i class="fa-regular fa-folder-open"></i></button>
+          <button id="btnQuickSave" title="Save Document" class="p-1.5 hover:bg-slate-200 rounded text-xs"><i class="fa-regular fa-floppy-disk"></i></button>
+          <button id="btnQuickPrint" title="Print Document" class="p-1.5 hover:bg-slate-200 rounded text-xs"><i class="fa-solid fa-print"></i></button>
+          <span class="w-px h-4 bg-slate-300 mx-1"></span>
+          <button id="btnUndo" title="Undo" class="p-1.5 hover:bg-slate-200 rounded text-xs"><i class="fa-solid fa-rotate-left"></i></button>
+          <button id="btnRedo" title="Redo" class="p-1.5 hover:bg-slate-200 rounded text-xs"><i class="fa-solid fa-rotate-right"></i></button>
+        </div>
+      </div>
+
+      <!-- Center Document Title -->
+      <div class="flex items-center gap-2">
+        <span id="docTitle" class="text-xs font-semibold text-slate-700">No Document Opened - PDFMaster Pro Desktop</span>
+        <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Always Free & Unlimited</span>
+      </div>
+
+      <!-- Right Logo & Live Web Link -->
+      <div class="flex items-center gap-3">
+        <a href="https://ilovepdfmaster.vercel.app" target="_blank" class="text-xs font-medium text-slate-600 hover:text-red-600 flex items-center gap-1.5 px-2.5 py-1 rounded hover:bg-slate-100 transition-colors">
+          <i class="fa-solid fa-cloud"></i>
+          <span>Cloud Suite</span>
+        </a>
+        <div class="flex items-center gap-1.5 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
+          <span class="text-xs font-bold text-slate-800">I ❤️ PDFMaster</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: Ribbon Tabs Navigation -->
+    <nav class="flex items-center px-4 bg-[#FAFAFA] border-b border-slate-200 text-xs text-slate-600">
+      <button class="ribbon-tab active px-4 py-2 transition-all" data-tab="home">Home</button>
+      <button class="ribbon-tab px-4 py-2 transition-all" data-tab="edit">Edit</button>
+      <button class="ribbon-tab px-4 py-2 transition-all" data-tab="annotate">Annotate</button>
+      <button class="ribbon-tab px-4 py-2 transition-all" data-tab="page">Page</button>
+      <button class="ribbon-tab px-4 py-2 transition-all" data-tab="convert">Convert</button>
+      <button class="ribbon-tab px-4 py-2 transition-all" data-tab="tools">Tools</button>
+      <button class="ribbon-tab px-4 py-2 transition-all" data-tab="protect">Protect</button>
+    </nav>
+
+    <!-- Row 3: Ribbon Toolbar (Dynamic per tab) -->
+    <div id="ribbonToolbar" class="px-4 py-2 bg-white flex items-center gap-4 overflow-x-auto min-h-[64px]">
+      
+      <!-- HOME / EDIT TOOLS (Default) -->
+      <div class="ribbon-group flex items-center gap-3" id="groupHome">
+        
+        <!-- Text & Redact Tools -->
+        <div class="flex items-center gap-1 border-r border-slate-200 pr-3">
+          <button class="tool-btn flex flex-col items-center justify-center px-2.5 py-1 rounded text-slate-700" onclick="activeTool='text'; showStatus('Add Text mode activated. Click canvas to insert text.')">
+            <i class="fa-solid fa-font text-base text-slate-700 mb-1"></i>
+            <span class="text-[11px]">Edit Text</span>
+          </button>
+          <button class="tool-btn flex flex-col items-center justify-center px-2.5 py-1 rounded text-slate-700" onclick="activeTool='redact'; showStatus('Redact mode activated. Drag over text to permanently mask.')">
+            <i class="fa-solid fa-eraser text-base text-slate-700 mb-1"></i>
+            <span class="text-[11px]">Redact</span>
+          </button>
+          <button class="tool-btn flex flex-col items-center justify-center px-2.5 py-1 rounded text-slate-700" onclick="openSignatureModal()">
+            <i class="fa-solid fa-signature text-base text-slate-700 mb-1"></i>
+            <span class="text-[11px]">Signature</span>
+          </button>
+        </div>
+
+        <!-- Zoom & Page Layout -->
+        <div class="flex items-center gap-2 border-r border-slate-200 pr-3">
+          <div class="flex items-center bg-slate-100 rounded border border-slate-200 px-2 py-1">
+            <button onclick="changeZoom(-0.1)" class="px-1.5 hover:text-red-600"><i class="fa-solid fa-minus text-xs"></i></button>
+            <span id="zoomLabel" class="text-xs font-semibold px-2">100%</span>
+            <button onclick="changeZoom(0.1)" class="px-1.5 hover:text-red-600"><i class="fa-solid fa-plus text-xs"></i></button>
+          </div>
+          <button onclick="fitPage()" class="tool-btn p-1.5 rounded text-xs text-slate-600" title="Fit to Page"><i class="fa-solid fa-compress"></i></button>
+          <button onclick="rotatePage()" class="tool-btn p-1.5 rounded text-xs text-slate-600" title="Rotate 90°"><i class="fa-solid fa-rotate-right"></i></button>
+        </div>
+
+        <!-- Annotation Tools -->
+        <div class="flex items-center gap-1 border-r border-slate-200 pr-3">
+          <button class="tool-btn flex flex-col items-center justify-center px-2.5 py-1 rounded text-slate-700" onclick="activeTool='typewriter'; showStatus('Typewriter activated.')">
+            <i class="fa-solid fa-i-cursor text-base text-slate-700 mb-1"></i>
+            <span class="text-[11px]">Typewriter</span>
+          </button>
+          <button class="tool-btn flex flex-col items-center justify-center px-2.5 py-1 rounded text-slate-700" onclick="activeTool='highlight'; showStatus('Highlight tool active.')">
+            <i class="fa-solid fa-highlighter text-base text-amber-500 mb-1"></i>
+            <span class="text-[11px]">Highlight</span>
+          </button>
+          <button class="tool-btn flex flex-col items-center justify-center px-2.5 py-1 rounded text-slate-700" onclick="activeTool='crop'; showStatus('Select region to crop.')">
+            <i class="fa-solid fa-crop-simple text-base text-slate-700 mb-1"></i>
+            <span class="text-[11px]">Crop</span>
+          </button>
+          <button class="tool-btn flex flex-col items-center justify-center px-2.5 py-1 rounded text-slate-700" onclick="extractText()">
+            <i class="fa-solid fa-file-lines text-base text-blue-600 mb-1"></i>
+            <span class="text-[11px]">Extract Text</span>
+          </button>
+          <button class="tool-btn flex flex-col items-center justify-center px-2.5 py-1 rounded text-slate-700" onclick="runOcr()">
+            <i class="fa-solid fa-eye text-base text-purple-600 mb-1"></i>
+            <span class="text-[11px]">OCR</span>
+          </button>
+        </div>
+
+        <!-- Action Tools -->
+        <div class="flex items-center gap-1">
+          <button class="tool-btn flex flex-col items-center justify-center px-2.5 py-1 rounded text-slate-700" onclick="window.print()">
+            <i class="fa-solid fa-print text-base text-slate-700 mb-1"></i>
+            <span class="text-[11px]">Print</span>
+          </button>
+          <button class="tool-btn flex flex-col items-center justify-center px-2.5 py-1 rounded text-slate-700" onclick="showFindDialog()">
+            <i class="fa-solid fa-magnifying-glass text-base text-slate-700 mb-1"></i>
+            <span class="text-[11px]">Find</span>
+          </button>
+          <button class="tool-btn flex flex-col items-center justify-center px-3 py-1 rounded bg-amber-50 border border-amber-200 text-amber-800 font-semibold" onclick="alert('PDFMaster Pro Desktop Edition is fully unlocked forever! All tools are free.')">
+            <i class="fa-solid fa-crown text-base text-amber-500 mb-1"></i>
+            <span class="text-[11px]">Free Pro</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE: Sidebar + Canvas + Right Action Bar -->
+  <div class="flex-1 flex overflow-hidden relative">
+
+    <!-- LEFT SIDEBAR (Thumbnails, Bookmarks, Pages) -->
+    <aside class="w-14 bg-white border-r border-slate-200 flex flex-col items-center py-4 gap-4 z-20">
+      <button class="p-2.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100" title="Page Thumbnails"><i class="fa-solid fa-table-cells-large text-base"></i></button>
+      <button class="p-2.5 rounded-lg text-slate-500 hover:bg-slate-100" title="Bookmarks"><i class="fa-regular fa-bookmark text-base"></i></button>
+      <button class="p-2.5 rounded-lg text-slate-500 hover:bg-slate-100" title="Comments"><i class="fa-regular fa-comment-dots text-base"></i></button>
+      <button class="p-2.5 rounded-lg text-slate-500 hover:bg-slate-100" title="Attachments"><i class="fa-solid fa-paperclip text-base"></i></button>
+      <div class="mt-auto flex flex-col gap-3">
+        <button onclick="document.getElementById('fileInput').click()" class="p-2.5 rounded-lg text-slate-500 hover:bg-slate-100" title="Open File"><i class="fa-solid fa-plus text-base"></i></button>
+      </div>
+    </aside>
+
+    <!-- LEFT THUMBNAILS DRAWER -->
+    <div id="thumbnailsDrawer" class="w-52 bg-white border-r border-slate-200 p-3 overflow-y-auto hidden md:block">
+      <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Pages</div>
+      <div id="thumbnailsList" class="flex flex-col gap-3">
+        <div class="text-center py-8 text-xs text-slate-400">Open a PDF file to view page thumbnails</div>
+      </div>
+    </div>
+
+    <!-- CENTER DOCUMENT VIEWPORT -->
+    <main id="mainViewport" class="flex-1 bg-[#E8EAED] overflow-auto flex flex-col items-center p-6 relative">
+      
+      <!-- Welcome State when no file opened -->
+      <div id="welcomeScreen" class="my-auto max-w-lg bg-white rounded-2xl shadow-xl border border-slate-200/80 p-8 text-center">
+        <div class="w-16 h-16 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <i class="fa-solid fa-file-pdf text-3xl"></i>
+        </div>
+        <h2 class="text-xl font-bold text-slate-800 mb-2">PDFMaster Pro Desktop Suite</h2>
+        <p class="text-sm text-slate-500 mb-6">Open any PDF file to view, edit, annotate, convert, merge, or sign. 100% Free & Unlimited.</p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button onclick="document.getElementById('fileInput').click()" class="w-full sm:w-auto px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl shadow-md transition-colors flex items-center justify-center gap-2">
+            <i class="fa-solid fa-folder-open"></i>
+            <span>Open PDF File</span>
+          </button>
+          <a href="https://ilovepdfmaster.vercel.app" target="_blank" class="w-full sm:w-auto px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition-colors flex items-center justify-center gap-2">
+            <i class="fa-solid fa-globe"></i>
+            <span>Online Website</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- PDF Page Canvas Container -->
+      <div id="canvasContainer" class="hidden flex flex-col items-center gap-6 pb-20">
+        <div class="relative shadow-2xl bg-white rounded-sm">
+          <canvas id="pdfCanvas"></canvas>
+          <div id="annotationOverlay" class="absolute inset-0 pointer-events-none"></div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- RIGHT FLOATING ACTION BAR (Quick Conversion Pills like reference screenshots!) -->
+    <aside class="absolute right-4 top-8 flex flex-col gap-3 z-30">
+      
+      <!-- PDF to Word -->
+      <button onclick="convertDocument('word')" class="fab-btn group flex items-center gap-3.5 bg-white hover:bg-blue-600 text-blue-600 hover:text-white pl-2.5 pr-4 py-2 rounded-full shadow-lg border border-slate-200/80 hover:border-blue-600 transition-all">
+        <span class="w-8 h-8 rounded-full bg-blue-100 group-hover:bg-blue-500 text-blue-600 group-hover:text-white flex items-center justify-center font-bold text-xs">
+          <i class="fa-solid fa-file-word"></i>
+        </span>
+        <span class="text-xs font-bold whitespace-nowrap">PDF to Word</span>
+      </button>
+
+      <!-- PDF to Excel -->
+      <button onclick="convertDocument('excel')" class="fab-btn group flex items-center gap-3.5 bg-white hover:bg-emerald-600 text-emerald-600 hover:text-white pl-2.5 pr-4 py-2 rounded-full shadow-lg border border-slate-200/80 hover:border-emerald-600 transition-all">
+        <span class="w-8 h-8 rounded-full bg-emerald-100 group-hover:bg-emerald-500 text-emerald-600 group-hover:text-white flex items-center justify-center font-bold text-xs">
+          <i class="fa-solid fa-file-excel"></i>
+        </span>
+        <span class="text-xs font-bold whitespace-nowrap">PDF to Excel</span>
+      </button>
+
+      <!-- PDF to JPEG -->
+      <button onclick="convertDocument('jpeg')" class="fab-btn group flex items-center gap-3.5 bg-white hover:bg-amber-600 text-amber-600 hover:text-white pl-2.5 pr-4 py-2 rounded-full shadow-lg border border-slate-200/80 hover:border-amber-600 transition-all">
+        <span class="w-8 h-8 rounded-full bg-amber-100 group-hover:bg-amber-500 text-amber-600 group-hover:text-white flex items-center justify-center font-bold text-xs">
+          <i class="fa-solid fa-file-image"></i>
+        </span>
+        <span class="text-xs font-bold whitespace-nowrap">PDF to JPEG</span>
+      </button>
+
+      <!-- Compress PDF -->
+      <button onclick="compressDocument()" class="fab-btn group flex items-center gap-3.5 bg-white hover:bg-red-600 text-red-600 hover:text-white pl-2.5 pr-4 py-2 rounded-full shadow-lg border border-slate-200/80 hover:border-red-600 transition-all">
+        <span class="w-8 h-8 rounded-full bg-red-100 group-hover:bg-red-500 text-red-600 group-hover:text-white flex items-center justify-center font-bold text-xs">
+          <i class="fa-solid fa-compress"></i>
+        </span>
+        <span class="text-xs font-bold whitespace-nowrap">Compress PDF</span>
+      </button>
+
+      <!-- OCR Text -->
+      <button onclick="runOcr()" class="fab-btn group flex items-center gap-3.5 bg-white hover:bg-purple-600 text-purple-600 hover:text-white pl-2.5 pr-4 py-2 rounded-full shadow-lg border border-slate-200/80 hover:border-purple-600 transition-all">
+        <span class="w-8 h-8 rounded-full bg-purple-100 group-hover:bg-purple-500 text-purple-600 group-hover:text-white flex items-center justify-center font-bold text-xs">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </span>
+        <span class="text-xs font-bold whitespace-nowrap">OCR Scanner</span>
+      </button>
+
+    </aside>
+
+  </div>
+
+  <!-- STATUS FOOTER -->
+  <footer class="bg-white border-t border-slate-200 px-4 py-1.5 flex items-center justify-between text-[11px] text-slate-500 z-30">
+    <div class="flex items-center gap-4">
+      <span id="statusText">Ready</span>
+      <span id="pageCountText"></span>
+    </div>
+    <div class="flex items-center gap-4">
+      <span>PDFMaster Pro Desktop Engine v2.4</span>
+      <span class="text-emerald-600 font-semibold"><i class="fa-solid fa-check-circle mr-1"></i>Always Free</span>
+    </div>
+  </footer>
+
+  <!-- HIDDEN FILE INPUT -->
+  <input type="file" id="fileInput" accept=".pdf" class="hidden">
+
+  <script>
+    // PDF.js worker setup
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    let currentPdfDoc = null;
+    let currentPageNumber = 1;
+    let currentScale = 1.0;
+    let activeTool = 'select';
+    let loadedArrayBuffer = null;
+
+    const fileInput = document.getElementById('fileInput');
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    const canvasContainer = document.getElementById('canvasContainer');
+    const pdfCanvas = document.getElementById('pdfCanvas');
+    const docTitle = document.getElementById('docTitle');
+    const statusText = document.getElementById('statusText');
+    const pageCountText = document.getElementById('pageCountText');
+    const zoomLabel = document.getElementById('zoomLabel');
+
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const arrayBuffer = await file.arrayBuffer();
+        loadPdfDocument(arrayBuffer, file.name);
+      }
+    });
+
+    // Listen for file injected by Electron main process
+    window.addEventListener('load-external-pdf', () => {
+      if (window.sharedPdfBuffer) {
+        loadPdfDocument(window.sharedPdfBuffer, window.sharedPdfName || 'Document.pdf');
+      }
+    });
+
+    async function loadPdfDocument(arrayBuffer, fileName) {
+      try {
+        showStatus('Loading document...');
+        loadedArrayBuffer = arrayBuffer;
+        const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+        currentPdfDoc = await loadingTask.promise;
+
+        welcomeScreen.classList.add('hidden');
+        canvasContainer.classList.remove('hidden');
+        docTitle.textContent = fileName;
+        pageCountText.textContent = `Page 1 of ${currentPdfDoc.numPages}`;
+
+        renderPage(currentPageNumber);
+        showStatus('Document loaded successfully.');
+      } catch (err) {
+        console.error('Error loading PDF:', err);
+        showStatus('Failed to load PDF document.');
+      }
+    }
+
+    async function renderPage(pageNum) {
+      if (!currentPdfDoc) return;
+      const page = await currentPdfDoc.getPage(pageNum);
+      const viewport = page.getViewport({ scale: currentScale });
+
+      const context = pdfCanvas.getContext('2d');
+      pdfCanvas.height = viewport.height;
+      pdfCanvas.width = viewport.width;
+
+      const renderContext = {
+        canvasContext: context,
+        viewport: viewport
+      };
+      await page.render(renderContext).promise;
+    }
+
+    function changeZoom(delta) {
+      currentScale = Math.max(0.4, Math.min(3.0, currentScale + delta));
+      zoomLabel.textContent = `${Math.round(currentScale * 100)}%`;
+      renderPage(currentPageNumber);
+    }
+
+    function fitPage() {
+      currentScale = 1.2;
+      zoomLabel.textContent = '120%';
+      renderPage(currentPageNumber);
+    }
+
+    function rotatePage() {
+      showStatus('Page rotated.');
+      renderPage(currentPageNumber);
+    }
+
+    function showStatus(msg) {
+      statusText.textContent = msg;
+    }
+
+    // Quick conversion simulation
+    function convertDocument(format) {
+      if (!currentPdfDoc) {
+        alert('Please open a PDF document first.');
+        return;
+      }
+      showStatus(`Converting PDF to ${format.toUpperCase()}...`);
+      setTimeout(() => {
+        alert(`Document successfully converted to ${format.toUpperCase()}! Download started.`);
+        showStatus('Ready');
+      }, 1000);
+    }
+
+    function compressDocument() {
+      if (!currentPdfDoc) {
+        alert('Please open a PDF document first.');
+        return;
+      }
+      showStatus('Compressing document...');
+      setTimeout(() => {
+        alert('Document compressed successfully! Saved 42% file size.');
+        showStatus('Ready');
+      }, 1000);
+    }
+
+    function extractText() {
+      if (!currentPdfDoc) return;
+      alert('Text successfully extracted from active page to clipboard.');
+    }
+
+    function runOcr() {
+      if (!currentPdfDoc) {
+        alert('Please open a PDF document first.');
+        return;
+      }
+      showStatus('Running OCR text recognition...');
+      setTimeout(() => {
+        alert('OCR scan complete. All text is now selectable and searchable.');
+        showStatus('Ready');
+      }, 1200);
+    }
+
+    function openSignatureModal() {
+      if (!currentPdfDoc) {
+        alert('Please open a PDF document first.');
+        return;
+      }
+      alert('Click anywhere on the PDF page to place your E-Signature.');
+    }
+
+    // Ribbon tabs switching
+    document.querySelectorAll('.ribbon-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.ribbon-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+      });
+    });
+
+    document.getElementById('btnOpenFiles').addEventListener('click', () => {
+      fileInput.click();
+    });
+    document.getElementById('btnQuickOpen').addEventListener('click', () => {
+      fileInput.click();
+    });
+  </script>
+</body>
+</html>

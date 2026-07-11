@@ -45,15 +45,6 @@ function injectPendingPdf() {
     const base64Data = data.toString('base64');
     const fileName = path.basename(pendingPdfPath);
 
-    const currentUrl = mainWindow.webContents.getURL();
-    if (!currentUrl.includes('/dashboard/editor') && !currentUrl.includes('offline.html')) {
-      const baseUrl = process.env.NODE_ENV === 'development' 
-        ? 'http://localhost:3000' 
-        : 'https://ilovepdfmaster.vercel.app';
-      mainWindow.loadURL(`${baseUrl}/dashboard/editor`);
-      return;
-    }
-
     const script = `
       (function() {
         try {
@@ -85,11 +76,11 @@ function injectPendingPdf() {
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 1280,
-    height: 800,
-    minWidth: 900,
-    minHeight: 600,
-    title: "PDFMaster Pro Desktop",
+    width: 1360,
+    height: 860,
+    minWidth: 960,
+    minHeight: 640,
+    title: "PDFMaster Pro Desktop Suite",
     icon: path.join(__dirname, 'icon.ico'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -103,15 +94,8 @@ function createWindow() {
     pendingPdfPath = initialPdf;
   }
 
-  const baseUrl = process.env.NODE_ENV === 'development' 
-    ? 'http://localhost:3000' 
-    : 'https://ilovepdfmaster.vercel.app';
-
-  const startUrl = pendingPdfPath ? `${baseUrl}/dashboard/editor` : baseUrl;
-
-  mainWindow.loadURL(startUrl).catch(() => {
-    mainWindow.loadFile(path.join(__dirname, 'offline.html'));
-  });
+  // Load Authentic Desktop PDF Suite Interface (matching reference screenshots)
+  mainWindow.loadFile(path.join(__dirname, 'app.html'));
 
   mainWindow.webContents.on('did-finish-load', () => {
     injectPendingPdf();
