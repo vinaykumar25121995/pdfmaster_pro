@@ -324,6 +324,18 @@ export default function PDFEditor() {
     }
   }, [pdfjsLibInstance]);
 
+  useEffect(() => {
+    const handleExternalLoad = () => {
+      if (pdfjsLibInstance && typeof window !== 'undefined' && (window as any).sharedPdfBuffer) {
+        setFileName((window as any).sharedPdfName || 'Document.pdf');
+        setFileLoaded(true);
+        loadPdfFromBuffer((window as any).sharedPdfBuffer);
+      }
+    };
+    window.addEventListener('load-external-pdf', handleExternalLoad);
+    return () => window.removeEventListener('load-external-pdf', handleExternalLoad);
+  }, [pdfjsLibInstance]);
+
   const loadPdfFromBuffer = async (buffer: ArrayBuffer) => {
     if (!pdfjsLibInstance) return;
     try {

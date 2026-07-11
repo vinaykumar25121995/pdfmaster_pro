@@ -18,24 +18,68 @@ if (!gotTheLock) {
   });
 }
 
-function handleCommandLineArgs(args) {
-  if (!args || !Array.isArray(args)) return;
-  const pdfArg = args.find(arg => arg && typeof arg === 'string' && arg.toLowerCase().endsWith('.pdf'));
-  if (pdfArg && fs.existsSync(pdfArg)) {
-    try {
-      const data = fs.readFileSync(pdfArg);
-      const base64Data = data.toString('base64');
-      const fileName = path.basename(pdfArg);
-      if (mainWindow && mainWindow.webContents) {
-        mainWindow.webContents.send('open-external-pdf', {
-          fileName,
-          filePath: pdfArg,
-          base64Data
-        });
-      }
-    } catch (err) {
-      console.error('Error opening file:', err);
+let pendingPdfPath = null;
+
+function findPdfInArgs(args) {
+  if (!args || !Array.isArray(args)) return null;
+  for (const arg of args) {
+    if (arg && typeof arg === 'string' && arg.toLowerCase().endsWith('.pdf') && fs.existsSync(arg)) {
+      return arg;
     }
+  }
+  return null;
+}
+
+function handleCommandLineArgs(args) {
+  const pdfArg = findPdfInArgs(args);
+  if (pdfArg) {
+    pendingPdfPath = pdfArg;
+    injectPendingPdf();
+  }
+}
+
+function injectPendingPdf() {
+  if (!pendingPdfPath || !mainWindow || !mainWindow.webContents) return;
+  try {
+    const data = fs.readFileSync(pendingPdfPath);
+    const base64Data = data.toString('base64');
+    const fileName = path.basename(pendingPdfPath);
+
+    const currentUrl = mainWindow.webContents.getURL();
+    if (!currentUrl.includes('/dashboard/editor') && !currentUrl.includes('offline.html')) {
+      const baseUrl = process.env.NODE_ENV === 'development' 
+        ? 'http://localhost:3000' 
+        : 'https://ilovepdfmaster.vercel.app';
+      mainWindow.loadURL(`${baseUrl}/dashboard/editor`);
+      return;
+    }
+
+    const script = `
+      (function() {
+        try {
+          const base64 = "${base64Data}";
+          const binaryString = atob(base64);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          window.sharedPdfBuffer = bytes.buffer;
+          window.sharedPdfName = "${fileName.replace(/"/g, '\\"')}";
+          window.dispatchEvent(new CustomEvent('load-external-pdf'));
+        } catch (e) {
+          console.error('Error injecting PDF:', e);
+        }
+      })();
+    `;
+    mainWindow.webContents.executeJavaScript(script);
+    mainWindow.webContents.send('open-external-pdf', {
+      fileName,
+      filePath: pendingPdfPath,
+      base64Data
+    });
+    pendingPdfPath = null;
+  } catch (err) {
+    console.error('Error opening PDF file:', err);
   }
 }
 
@@ -54,16 +98,23 @@ function createWindow() {
     },
   });
 
-  const startUrl = process.env.NODE_ENV === 'development' 
+  const initialPdf = findPdfInArgs(process.argv);
+  if (initialPdf) {
+    pendingPdfPath = initialPdf;
+  }
+
+  const baseUrl = process.env.NODE_ENV === 'development' 
     ? 'http://localhost:3000' 
     : 'https://ilovepdfmaster.vercel.app';
+
+  const startUrl = pendingPdfPath ? `${baseUrl}/dashboard/editor` : baseUrl;
 
   mainWindow.loadURL(startUrl).catch(() => {
     mainWindow.loadFile(path.join(__dirname, 'offline.html'));
   });
 
   mainWindow.webContents.on('did-finish-load', () => {
-    handleCommandLineArgs(process.argv);
+    injectPendingPdf();
   });
 
   mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
