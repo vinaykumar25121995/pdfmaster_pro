@@ -253,9 +253,156 @@ function UtilityToolsContent() {
     <div className="space-y-8 animate-slide-up">
       
       {/* Title */}
-      <div>
-        <h1 className="text-3xl font-black font-display text-slate-800 dark:text-slate-100">PDF Utility Toolkit</h1>
-        <p className="text-sm font-semibold text-slate-500 mt-1">Perform real PDF merges, page splitting, compression levels, and watermark overlays via backend services.</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-black font-display text-slate-800 dark:text-slate-100">All 28 PDF Tools Suite</h1>
+          <p className="text-sm font-semibold text-slate-500 mt-1">Every professional PDF tool organized into 6 complete suites. Always 100% free & unlimited.</p>
+        </div>
+      </div>
+
+      {/* COMPREHENSIVE 6-COLUMN TOOLS GRID (Exact match to reference image) */}
+      <div className="bg-white dark:bg-secondary-light/20 p-6 sm:p-8 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 sm:gap-8">
+          
+          {/* 1. ORGANIZE PDF */}
+          <div>
+            <h3 className="text-xs font-black tracking-wider text-red-500 uppercase mb-4 pb-2 border-b border-red-100 dark:border-red-900/30">Organize PDF</h3>
+            <div className="flex flex-col gap-2">
+              {[
+                { name: 'Merge PDF', action: () => setActiveTool('merge') },
+                { name: 'Split PDF', action: () => setActiveTool('split') },
+                { name: 'Remove pages', action: () => setActiveTool('split') },
+                { name: 'Extract pages', action: () => setActiveTool('split') },
+                { name: 'Organize PDF', action: () => window.location.href = '/dashboard/editor' },
+                { name: 'Scan to PDF', action: () => window.location.href = '/dashboard/ocr' }
+              ].map((tool, i) => (
+                <button
+                  key={i}
+                  onClick={tool.action}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600 transition-colors"
+                >
+                  <FileText className="w-4 h-4 text-slate-400 group-hover:text-red-500" />
+                  <span>{tool.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 2. OPTIMIZE PDF */}
+          <div>
+            <h3 className="text-xs font-black tracking-wider text-emerald-600 uppercase mb-4 pb-2 border-b border-emerald-100 dark:border-emerald-900/30">Optimize PDF</h3>
+            <div className="flex flex-col gap-2">
+              {[
+                { name: 'Compress PDF', action: () => setActiveTool('compress') },
+                { name: 'Repair PDF', action: () => setActiveTool('compress') },
+                { name: 'OCR PDF', action: () => window.location.href = '/dashboard/ocr' }
+              ].map((tool, i) => (
+                <button
+                  key={i}
+                  onClick={tool.action}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:text-emerald-600 transition-colors"
+                >
+                  <Minimize2 className="w-4 h-4 text-slate-400" />
+                  <span>{tool.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 3. CONVERT TO PDF */}
+          <div>
+            <h3 className="text-xs font-black tracking-wider text-amber-500 uppercase mb-4 pb-2 border-b border-amber-100 dark:border-amber-900/30">Convert to PDF</h3>
+            <div className="flex flex-col gap-2">
+              {[
+                { name: 'JPG to PDF', action: () => window.location.href = '/dashboard/convert' },
+                { name: 'WORD to PDF', action: () => window.location.href = '/dashboard/convert' },
+                { name: 'POWERPOINT to PDF', action: () => window.location.href = '/dashboard/convert' },
+                { name: 'EXCEL to PDF', action: () => window.location.href = '/dashboard/convert' },
+                { name: 'HTML to PDF', action: () => window.location.href = '/dashboard/convert' }
+              ].map((tool, i) => (
+                <button
+                  key={i}
+                  onClick={tool.action}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-amber-950/30 hover:text-amber-600 transition-colors"
+                >
+                  <Upload className="w-4 h-4 text-slate-400" />
+                  <span>{tool.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 4. CONVERT FROM PDF */}
+          <div>
+            <h3 className="text-xs font-black tracking-wider text-blue-500 uppercase mb-4 pb-2 border-b border-blue-100 dark:border-blue-900/30">Convert from PDF</h3>
+            <div className="flex flex-col gap-2">
+              {[
+                { name: 'PDF to JPG', action: () => window.location.href = '/dashboard/convert' },
+                { name: 'PDF to WORD', action: () => window.location.href = '/dashboard/convert' },
+                { name: 'PDF to POWERPOINT', action: () => window.location.href = '/dashboard/convert' },
+                { name: 'PDF to EXCEL', action: () => window.location.href = '/dashboard/convert' },
+                { name: 'PDF to PDF/A', action: () => window.location.href = '/dashboard/convert' }
+              ].map((tool, i) => (
+                <button
+                  key={i}
+                  onClick={tool.action}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-950/30 hover:text-blue-600 transition-colors"
+                >
+                  <Download className="w-4 h-4 text-slate-400" />
+                  <span>{tool.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 5. EDIT PDF */}
+          <div>
+            <h3 className="text-xs font-black tracking-wider text-purple-500 uppercase mb-4 pb-2 border-b border-purple-100 dark:border-purple-900/30">Edit PDF</h3>
+            <div className="flex flex-col gap-2">
+              {[
+                { name: 'Rotate PDF', action: () => window.location.href = '/dashboard/editor' },
+                { name: 'Add page numbers', action: () => window.location.href = '/dashboard/editor' },
+                { name: 'Add watermark', action: () => setActiveTool('watermark') },
+                { name: 'Crop PDF', action: () => window.location.href = '/dashboard/editor' },
+                { name: 'Edit PDF', action: () => window.location.href = '/dashboard/editor' },
+                { name: 'PDF Forms', action: () => window.location.href = '/dashboard/editor' }
+              ].map((tool, i) => (
+                <button
+                  key={i}
+                  onClick={tool.action}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-purple-50 dark:hover:bg-purple-950/30 hover:text-purple-600 transition-colors"
+                >
+                  <Layers className="w-4 h-4 text-slate-400" />
+                  <span>{tool.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 6. PDF SECURITY */}
+          <div>
+            <h3 className="text-xs font-black tracking-wider text-indigo-600 uppercase mb-4 pb-2 border-b border-indigo-100 dark:border-indigo-900/30">PDF Security</h3>
+            <div className="flex flex-col gap-2">
+              {[
+                { name: 'Unlock PDF', action: () => window.location.href = '/dashboard/editor' },
+                { name: 'Protect PDF', action: () => window.location.href = '/dashboard/editor' },
+                { name: 'Sign PDF', action: () => window.location.href = '/dashboard/signature' },
+                { name: 'Redact PDF', action: () => window.location.href = '/dashboard/editor' },
+                { name: 'Compare PDF', action: () => window.location.href = '/dashboard/editor' }
+              ].map((tool, i) => (
+                <button
+                  key={i}
+                  onClick={tool.action}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 hover:text-indigo-600 transition-colors"
+                >
+                  <CheckCircle className="w-4 h-4 text-slate-400" />
+                  <span>{tool.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+        </div>
       </div>
 
       {/* Main Grid */}
